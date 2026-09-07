@@ -24,8 +24,18 @@
 #   6  task scope or forbidden database command violation
 #   7  reviewer human_gate
 #   8  task not approved after MaxAttemptsPerTask
-#   9  MaxIterations reached without completion
+#   9  MaxIterations reached: normal batch boundary, NOT a human gate
 #   10 selected provider CLI is unavailable
+#
+# Batch boundaries vs human gates
+# -------------------------------
+# Exit 9 means "this batch spent its iteration budget"; it is a budget event,
+# never a decision request. It writes .loop/MAX_ITERATIONS_REACHED.md (an
+# informational receipt) and never .loop/HUMAN_GATE.md, so a supervisor that
+# stops on HUMAN_GATE.md is not stopped by a budget limit.
+#
+# .loop/HUMAN_GATE.md is reserved for states that genuinely need a human:
+# exit codes 2, 3, 4, 5, 6, 7, 8 and 10. Its presence always means stop.
 
 set -u
 set -o pipefail
@@ -111,7 +121,7 @@ ensure_local_excludes() {
   mkdir -p "$(dirname "$exclude_path")"
   touch "$exclude_path"
   local entry
-  for entry in ".loop/runs/" ".loop/HUMAN_GATE.md"; do
+  for entry in ".loop/runs/" ".loop/HUMAN_GATE.md" ".loop/MAX_ITERATIONS_REACHED.md"; do
     if ! grep -qxF "$entry" "$exclude_path" 2>/dev/null; then
       echo "$entry" >> "$exclude_path"
     fi
@@ -647,6 +657,10 @@ write_task_packet() {
   echo "$task_md"
 }
 
+# Writes the real stop-the-world artifact. Call this ONLY when a human decision
+# is genuinely required: a missing architectural decision, a guard violation, a
+# forbidden implementer commit, a failed task, or a missing provider CLI.
+# Never call it for a spent iteration budget - that is write_batch_boundary.
 write_human_gate() {
   local reason="$1" questions_json="$2" run_dir="$3"
   local path="$REPO_ROOT/.loop/HUMAN_GATE.md"
@@ -674,6 +688,40 @@ write_human_gate() {
   } > "$path"
   write_step "HUMAN_GATE: $reason"
   write_step "Questions written to $path"
+}
+
+# Batch boundary receipt. This is NOT a human gate: it asks nothing, blocks
+# nothing, and is git-ignored so the worktree stays clean for the next batch.
+# All committed work, STATE.json and the reviewer rotation are already durable
+# by the time this runs.
+write_batch_boundary() {
+  local iterations_done="$1" runs_root="$2"
+  local path="$REPO_ROOT/.loop/MAX_ITERATIONS_REACHED.md"
+  {
+    echo "# MAX_ITERATIONS_REACHED"
+    echo
+    echo "This batch used its full iteration budget. This is a normal batch"
+    echo "boundary, not a human gate. Nothing is blocked and no decision is"
+    echo "pending. There are no questions to answer."
+    echo
+    echo "## Batch"
+    echo "- Iterations completed: $iterations_done/$MAX_ITERATIONS"
+    echo "- Finished at: $(now_iso)"
+    echo
+    echo "## State"
+    echo "Approved work is committed and STATE.json is up to date. The reviewer"
+    echo "rotation counter has advanced normally."
+    echo
+    echo "## Continue"
+    echo "Start another batch. The supervisor may do this without a human when"
+    echo "the last task was approved, its commit exists, STATE.json is"
+    echo "consistent, the worktree is clean, no .loop/HUMAN_GATE.md exists and"
+    echo "no guard failure or BLOCKED state occurred."
+    echo
+    echo "Run artifacts: $runs_root"
+  } > "$path"
+  write_step "MAX_ITERATIONS_REACHED: batch boundary after $iterations_done/$MAX_ITERATIONS iteration(s). Not a human gate."
+  write_step "Receipt written to $path"
 }
 
 approve_and_commit() {
@@ -738,6 +786,15 @@ cd "$REPO_ROOT" || die "Could not enter repository root."
 ensure_local_excludes "$REPO_ROOT"
 assert_safe_branch
 assert_clean_worktree
+
+# A real human gate outranks any batch. Refuse to start until a human has
+# recorded the decision and removed the file; the harness never clears it.
+if [ -f "$REPO_ROOT/.loop/HUMAN_GATE.md" ]; then
+  die ".loop/HUMAN_GATE.md exists. A human decision is pending; the harness will not start a new batch. Resolve it and delete the file."
+fi
+
+# A stale batch-boundary receipt describes a finished batch, never this one.
+rm -f "$REPO_ROOT/.loop/MAX_ITERATIONS_REACHED.md"
 
 LOOP_ROOT="$REPO_ROOT/.loop"
 STATE_PATH="$LOOP_ROOT/STATE.json"
@@ -971,6 +1028,5 @@ while [ "$iteration" -le "$MAX_ITERATIONS" ]; do
   iteration=$(( iteration + 1 ))
 done
 
-write_human_gate "Loop reached MaxIterations=$MAX_ITERATIONS without completion." \
-  '["Review progress/cost before increasing the budget."]' "$RUNS_ROOT"
+write_batch_boundary "$(( iteration - 1 ))" "$RUNS_ROOT"
 exit 9

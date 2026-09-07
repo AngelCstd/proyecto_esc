@@ -17,6 +17,7 @@ Bash loop (loop.sh es el supervisor; no hay sesion de modelo persistente)
    |
    +-> commit local si aprueba
    +-> HUMAN_GATE si falta una decision
+   +-> batch boundary (exit 9) si se agotan las iteraciones
 ```
 
 Cada agente es una invocacion one-shot y efimera de un CLI. El supervisor es
@@ -92,7 +93,7 @@ defaults del fichero.
 | `ARCHITECT_PROVIDER` | `codex` | `codex` \| `claude` |
 | `CODEX_BIN` / `CLAUDE_BIN` | `codex` / `claude` | Ruta al binario |
 | `CODEX_MODEL` / `CLAUDE_MODEL` | vacio | Override de modelo |
-| `MAX_ITERATIONS` | `20` | Iteraciones del arquitecto |
+| `MAX_ITERATIONS` | `20` | Iteraciones del arquitecto por batch. Agotarlas es un batch boundary (exit 9), no un HUMAN_GATE |
 | `MAX_ATTEMPTS_PER_TASK` | `2` | Intentos de implementacion por tarea |
 | `DIFF_MAX_LINES` | `4000` | Corte del `diff.patch` entregado al reviewer |
 
@@ -152,7 +153,9 @@ El provider del reviewer se elige **una sola vez por tarea** y se persiste en
 provider y no avanzan la rotacion; un resume despues de un HUMAN_GATE tampoco
 desplaza la cadencia. El contador vive en `.loop/runs/reviewer-rotation.count`,
 que esta en `.git/info/exclude` y por tanto nunca ensucia el worktree ni activa
-la guarda de scope. `STATE.json` recibe un espejo de solo auditoria en
+la guarda de scope. `loop.sh` mantiene ahi tambien `.loop/runs/`,
+`.loop/HUMAN_GATE.md` y `.loop/MAX_ITERATIONS_REACHED.md`, por la misma razon:
+el batch boundary debe dejar el worktree limpio para el batch siguiente. `STATE.json` recibe un espejo de solo auditoria en
 `reviewer_rotation` en el mismo momento en que ya se commitea.
 
 Con `CLAUDE_REVIEW_EVERY=0` el contador sigue avanzando pero siempre resuelve a
@@ -259,9 +262,35 @@ se usan.
 6   violacion de scope o comando de base de datos prohibido
 7   HUMAN_GATE del reviewer
 8   la tarea no paso tras MAX_ATTEMPTS_PER_TASK intentos
-9   MAX_ITERATIONS alcanzado sin completar
+9   MAX_ITERATIONS alcanzado: fin normal de batch, NO es human gate
 10  el CLI del provider seleccionado no esta instalado
 ```
+
+Los codigos 2-8 y 10 escriben `.loop/HUMAN_GATE.md` y detienen al supervisor.
+Los codigos 0 y 9 no.
+
+### Batch boundary vs HUMAN_GATE
+
+El exit 9 significa que el batch agoto su presupuesto de iteraciones. Es un
+evento de presupuesto, nunca una peticion de decision. Escribe:
+
+```text
+.loop/MAX_ITERATIONS_REACHED.md
+```
+
+que es un recibo informativo: no pregunta nada, no bloquea nada, esta
+git-ignored y el harness lo borra al empezar el siguiente batch. El trabajo
+aprobado ya esta commiteado y `STATE.json` y la rotacion de reviewer quedan
+actualizados con normalidad.
+
+El supervisor puede arrancar otro batch sin intervencion humana tras un exit 9
+si se cumplen las seis condiciones: ultimo trabajo aprobado, commit presente,
+`STATE.json` consistente, worktree limpio, sin `.loop/HUMAN_GATE.md`, y sin
+guard failure ni estado BLOCKED.
+
+Un HUMAN_GATE real no cambia: sigue escribiendo `.loop/HUMAN_GATE.md`, sigue
+deteniendo el trabajo y solo lo borra un humano. Ademas el harness ahora se
+niega a arrancar un batch mientras ese fichero exista (exit 1).
 
 ## No tests en V2
 
@@ -298,6 +327,9 @@ Cuando ocurra, revisa:
 ```
 
 Toma la decision, registrala en `.loop/ARCHITECTURE_DECISIONS.md`, limpia/commitea el worktree y vuelve a correr.
+
+Agotar `MAX_ITERATIONS` **no** es uno de estos casos: eso es un batch boundary
+(exit 9) y escribe `.loop/MAX_ITERATIONS_REACHED.md`, no un HUMAN_GATE.
 
 ## Prisma y tu tabla existente
 

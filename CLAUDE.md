@@ -73,6 +73,11 @@ Then check the live state:
 Do not clear a HUMAN_GATE yourself. Clearing it means a human recorded a
 decision in `ARCHITECTURE_DECISIONS.md` and deleted the file.
 
+`.loop/MAX_ITERATIONS_REACHED.md` is **not** a gate. It is an informational
+receipt left by a batch that spent its iteration budget, it asks nothing, and
+the harness deletes it at the start of the next batch. Never treat it as a stop
+signal and never confuse it with `HUMAN_GATE.md`.
+
 ---
 
 ## Loop exit codes
@@ -90,11 +95,37 @@ decision in `ARCHITECTURE_DECISIONS.md` and deleted the file.
 | 6 | scope or database guard violation | Stop. Do NOT revert; the human inspects the diff. |
 | 7 | reviewer HUMAN_GATE | Stop. Surface the questions. |
 | 8 | task failed after all attempts | Stop. Report reviewer findings; do not fix by hand. |
-| 9 | max iterations reached | Report cost/progress before raising the budget. |
+| 9 | batch boundary — iteration budget spent | Normal end of batch. No human needed by itself. See below. |
 | 10 | selected provider CLI missing | Stop. Never install it automatically. |
 
-Codes 2 through 8 and 10 are all "stop and report" states. Only code 0 is a
-green light, and only for work that is genuinely still pending.
+Codes 2 through 8 and 10 are all "stop and report" states, and every one of them
+writes `.loop/HUMAN_GATE.md`. Codes 0 and 9 are not.
+
+---
+
+## Exit 9 is a batch boundary, not a gate
+
+Exit 9 means the batch spent its iteration budget. It is a budget event, never a
+decision request. It writes `.loop/MAX_ITERATIONS_REACHED.md`, never
+`.loop/HUMAN_GATE.md`, and it leaves commits, `STATE.json` and the reviewer
+rotation in their normal committed state.
+
+**Exit 9 by itself does not require a human.** After it you may start another
+batch automatically, provided **all six** of these hold:
+
+1. The last task was approved by the reviewer.
+2. The expected commit for that task exists.
+3. `STATE.json` is consistent — the task is in `completed_tasks`, `last_review`
+   is `approve`, `blocked_tasks` is empty.
+4. `git status` is clean.
+5. `.loop/HUMAN_GATE.md` does not exist.
+6. No guard failure and no `BLOCKED` state occurred in the batch.
+
+If any one of them fails, stop and report instead of starting another batch.
+
+A real HUMAN_GATE is unchanged: it still writes `.loop/HUMAN_GATE.md`, still
+stops you immediately, and is still cleared only by a human. The harness itself
+now refuses to start a batch while that file exists.
 
 ---
 
