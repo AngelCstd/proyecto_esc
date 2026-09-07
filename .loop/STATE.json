@@ -1,16 +1,29 @@
 {
   "project": "noktos-auth",
   "version": 2,
-  "status": "NOT_STARTED",
-  "iteration": 0,
+  "status": "RUNNING",
+  "iteration": 1,
   "current_task": null,
-  "completed_tasks": [],
+  "completed_tasks": [
+    "AUTH-000-A"
+  ],
   "blocked_tasks": [],
-  "last_review": null,
+  "last_review": {
+    "task_id": "AUTH-000-A",
+    "verdict": "approve",
+    "summary": "The minimal NestJS/TypeScript bootstrap meets AUTH-000-A acceptance criteria. Changes are confined to allowed paths, the root module is empty, no prohibited integrations or domain behavior were introduced, and deterministic verification confirms the build passes.",
+    "reviewed_at": "2026-09-07T18:58:57Z",
+    "provider": "codex"
+  },
   "notes": [
     "No tests are executed by loop V2.",
     "Do not connect autonomous agents to the production Supabase database.",
     "Core does not exist yet; Auth defines stable seams/contracts but does not implement Core.",
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
-  ]
+  ],
+  "reviewer_rotation": {
+    "slot": 1,
+    "last_provider": "codex",
+    "claude_review_every": 0
+  }
 }
