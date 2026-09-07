@@ -2,17 +2,18 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 1,
+  "iteration": 2,
   "current_task": null,
   "completed_tasks": [
-    "AUTH-000-A"
+    "AUTH-000-A",
+    "AUTH-001-A"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-000-A",
+    "task_id": "AUTH-001-A",
     "verdict": "approve",
-    "summary": "The minimal NestJS/TypeScript bootstrap meets AUTH-000-A acceptance criteria. Changes are confined to allowed paths, the root module is empty, no prohibited integrations or domain behavior were introduced, and deterministic verification confirms the build passes.",
-    "reviewed_at": "2026-09-07T18:58:57Z",
+    "summary": "The complete diff is confined to allowed paths and satisfies AUTH-001-A. Configuration is globally registered with caching, validation normalizes NODE_ENV and PORT with correct defaults and bounds, bootstrap resolves PORT through ConfigService without direct environment access, .env.example contains only non-secret placeholders, dependencies are consistent, and deterministic build verification passed.",
+    "reviewed_at": "2026-09-07T20:38:00Z",
     "provider": "codex"
   },
   "notes": [
@@ -22,7 +23,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 1,
+    "slot": 2,
     "last_provider": "codex",
     "claude_review_every": 0
   }

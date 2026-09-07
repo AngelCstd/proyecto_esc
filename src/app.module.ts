@@ -1,4 +1,15 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 
-@Module({})
+import { validateEnvironment } from './config/environment.validation';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      cache: true,
+      isGlobal: true,
+      validate: validateEnvironment,
+    }),
+  ],
+})
 export class AppModule {}
