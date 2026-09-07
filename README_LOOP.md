@@ -119,10 +119,22 @@ una regla de archivo exacto y no cubre lo que hay dentro de `src/auth/`.
 Reglas de enforcement:
 
 - `forbidden_paths` siempre gana sobre `allowed_paths`.
-- Las rutas protegidas (`.loop/GOAL.md`, `.loop/ARCHITECTURE_DECISIONS.md`,
-  `.loop/CONTRACTS.md`, `.loop/PRISMA_SAFETY.md`, `.loop/BACKLOG.yaml`,
-  `.loop/STATE.json`, `.loop/prompts/`, `.loop/schemas/`, `.loop/scripts/`) son
-  prohibidas siempre, digan lo que digan los `allowed_paths`.
+- Las rutas protegidas son prohibidas siempre, digan lo que digan los
+  `allowed_paths`:
+
+  ```text
+  .loop/GOAL.md                     .loop/prompts/
+  .loop/ARCHITECTURE_DECISIONS.md   .loop/schemas/
+  .loop/CONTRACTS.md                .loop/scripts/
+  .loop/PRISMA_SAFETY.md            CLAUDE.md
+  .loop/BACKLOG.yaml                AGENTS.md
+  .loop/STATE.json
+  ```
+
+  `CLAUDE.md` (contrato del supervisor) y `AGENTS.md` (contrato global de los
+  agentes) estan protegidos por la misma razon que `.loop/scripts/`: un
+  implementer no puede reescribir las reglas que lo gobiernan. Un intento
+  termina en HUMAN_GATE con exit code 6.
 - La comparacion es case-insensitive y **literal**: no se hace globbing sobre el
   texto de la regla, asi que una regla no puede ensancharse sola.
 - El scope se calcula **solo** desde Git (`git diff` + `git ls-files`).

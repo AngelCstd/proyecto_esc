@@ -240,6 +240,8 @@ PROTECTED_PATHS=(
   ".loop/prompts/"
   ".loop/schemas/"
   ".loop/scripts/"
+  "CLAUDE.md"
+  "AGENTS.md"
 )
 
 # Fail-closed sanitation at the entry point of every path that comes from git.
