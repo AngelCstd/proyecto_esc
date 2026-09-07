@@ -1,0 +1,16 @@
+{
+  "project": "noktos-auth",
+  "version": 2,
+  "status": "NOT_STARTED",
+  "iteration": 0,
+  "current_task": null,
+  "completed_tasks": [],
+  "blocked_tasks": [],
+  "last_review": null,
+  "notes": [
+    "No tests are executed by loop V2.",
+    "Do not connect autonomous agents to the production Supabase database.",
+    "Core does not exist yet; Auth defines stable seams/contracts but does not implement Core.",
+    "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
+  ]
+}

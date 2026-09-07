@@ -1,0 +1,14 @@
+# Noktos Auth agent rules
+
+Read .loop/GOAL.md and architecture files before editing.
+
+Hard rules:
+- no Core implementation
+- no MCP implementation
+- no direct Core HTTP outside CoreClient/AppClient
+- no destructive Prisma/Supabase commands
+- public.user_info is externally managed
+- no secrets in logs/repo
+- API keys are hash-only at rest and revocable
+- V1 Auth->Core credential strategy is Noop but must remain replaceable
+- do not commit/push/deploy from worker runs

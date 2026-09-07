@@ -1,0 +1,14 @@
+# Noktos Auth engineering loop
+
+Before proposing implementation work, read:
+
+- .loop/GOAL.md
+- .loop/ARCHITECTURE_DECISIONS.md
+- .loop/CONTRACTS.md
+- .loop/PRISMA_SAFETY.md
+
+This repository is Noktos Auth only. Core and MCP are out of scope.
+
+Nothing may call Core directly except the Auth-side CoreClient/AppClient boundary.
+
+Do not execute real Supabase migrations from autonomous agent runs.

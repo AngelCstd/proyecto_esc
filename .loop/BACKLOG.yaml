@@ -1,0 +1,130 @@
+project: noktos-auth
+version: 2
+policy:
+  tests_in_loop: false
+  reviewer_required: true
+  deterministic_build_check: true
+  prisma_validate_check: true
+  max_attempts_per_task: 2
+  final_status: READY_FOR_HUMAN_REVIEW
+
+items:
+  - id: AUTH-000
+    title: Bootstrap NestJS repository
+    objective: Create the minimal clean NestJS/TypeScript/npm application in this new repository while preserving the loop harness.
+    risk: low
+    depends_on: []
+
+  - id: AUTH-001
+    title: Establish application boundaries and configuration
+    objective: Create stable NestJS module boundaries, environment validation, common error envelope types, request context primitives and documented architecture without domain logic.
+    risk: medium
+    depends_on: [AUTH-000]
+
+  - id: AUTH-002
+    title: Prisma and Supabase safety foundation
+    objective: Configure Prisma for the existing Supabase Postgres using public.user_info as externally managed/read-only from migrations and noktos_auth as the owned security schema. Do not touch a real database.
+    risk: critical
+    depends_on: [AUTH-001]
+
+  - id: AUTH-003
+    title: Supabase human identity verification
+    objective: Implement a Supabase access-token verification boundary that returns trusted Supabase user identity facts without leaking provider-specific concerns throughout the application.
+    risk: high
+    depends_on: [AUTH-001]
+
+  - id: AUTH-004
+    title: user_info identity resolution
+    objective: Implement repository/service code that resolves the authenticated Supabase user id through public.user_info and preserves id_agente, id_viajero and rol context.
+    risk: high
+    depends_on: [AUTH-002, AUTH-003]
+
+  - id: AUTH-005
+    title: Principal model and resolver
+    objective: Normalize trusted human identity context to Principal, allowing agentId and travelerId to coexist and without trusting externally supplied identity fields.
+    risk: high
+    depends_on: [AUTH-004]
+
+  - id: AUTH-006
+    title: AppClient HTTP foundation
+    objective: Implement the central outbound AppClient abstraction with configuration, timeout, request-id propagation, transport error normalization and pluggable request-auth strategy.
+    risk: high
+    depends_on: [AUTH-001]
+
+  - id: AUTH-007
+    title: CoreClient with Noop internal auth strategy
+    objective: Implement CoreClient as the only Core HTTP boundary using AppClient and NoopCoreRequestAuthStrategy for V1, leaving a stable strategy seam for a future signed JWT without touching consumers.
+    risk: high
+    depends_on: [AUTH-005, AUTH-006]
+
+  - id: AUTH-008
+    title: Core error propagation and sanitization
+    objective: Implement the Core-to-Auth error mapping contract: preserve safe expected HTTP statuses/codes/messages, sanitize internal 5xx, map transport failures, and carry requestId end-to-end.
+    risk: high
+    depends_on: [AUTH-007]
+
+  - id: AUTH-009
+    title: API credential persistence model
+    objective: Define Prisma-owned noktos_auth models for API credentials/scopes with one credential -> one agent, test/live environment, hash-only secret storage, revocation and last-used metadata. No live migration execution.
+    risk: critical
+    depends_on: [AUTH-002, AUTH-005]
+
+  - id: AUTH-010
+    title: API key generation and lifecycle service
+    objective: Implement secure nok_test_ and nok_live_ key generation, one-time secret return, hashing, list metadata, revoke and lookup primitives.
+    risk: critical
+    depends_on: [AUTH-009]
+
+  - id: AUTH-011
+    title: API key authentication and Principal resolution
+    objective: Authenticate incoming API keys, reject revoked/invalid credentials, update last-used safely and resolve one agent-bound api_key Principal with credential scopes.
+    risk: critical
+    depends_on: [AUTH-010]
+
+  - id: AUTH-012
+    title: General scope authorization primitives
+    objective: Implement reusable scope checks for API-key and future identities without inventing the final human role-to-scope matrix.
+    risk: high
+    depends_on: [AUTH-005, AUTH-011]
+
+  - id: AUTH-013
+    title: Human authenticated gateway context
+    objective: Implement guards/decorators/context plumbing so authenticated Supabase users can reach Auth controllers/services with a trusted Principal.
+    risk: high
+    depends_on: [AUTH-005]
+
+  - id: AUTH-014
+    title: Partner API ingress foundation
+    objective: Implement the Auth-side partner ingress pattern using API keys, scopes and CoreClient. Do not implement Core business endpoints that do not yet exist; create adapter/controller patterns and documented contracts only.
+    risk: high
+    depends_on: [AUTH-008, AUTH-011, AUTH-012]
+
+  - id: AUTH-015
+    title: Gateway rate limiting and credential-safe logging
+    objective: Add base rate limiting strategy, request logging/redaction rules and prevent JWT/API key secrets from logs.
+    risk: high
+    depends_on: [AUTH-013, AUTH-014]
+
+  - id: AUTH-016
+    title: Security audit events
+    objective: Add minimal security audit persistence/events for authentication failures, API key lifecycle actions and relevant gateway events without storing secrets.
+    risk: high
+    depends_on: [AUTH-009, AUTH-015]
+
+  - id: AUTH-017
+    title: MCP-facing Auth compatibility boundary
+    objective: Ensure the Auth ingress architecture can accept an authenticated user flow coming from a separate MCP service and resolve the same Principal. Do not build the MCP server or silently design the final OAuth registration flow.
+    risk: high
+    depends_on: [AUTH-013, AUTH-008]
+
+  - id: AUTH-018
+    title: Swagger and integration contracts
+    objective: Document public Auth endpoints, error envelope, Principal semantics, API key usage, AppClient/Core contract and environment variables. Core endpoint definitions may remain interface/placeholder contracts because Core does not exist yet.
+    risk: low
+    depends_on: [AUTH-014, AUTH-017]
+
+  - id: AUTH-019
+    title: Final architecture review handoff
+    objective: Review the implementation against GOAL, architecture decisions and Prisma safety policy; produce a human-review checklist and explicitly list deferred items such as internal Auth->Core JWT and final MCP OAuth.
+    risk: high
+    depends_on: [AUTH-015, AUTH-016, AUTH-018]
