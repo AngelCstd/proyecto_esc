@@ -294,6 +294,7 @@ PROTECTED_PATHS=(
   ".loop/scripts/"
   "CLAUDE.md"
   "AGENTS.md"
+  ".gitattributes"
 )
 
 # Fail-closed sanitation at the entry point of every path that comes from git.

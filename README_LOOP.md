@@ -129,13 +129,22 @@ Reglas de enforcement:
   .loop/CONTRACTS.md                .loop/scripts/
   .loop/PRISMA_SAFETY.md            CLAUDE.md
   .loop/BACKLOG.yaml                AGENTS.md
-  .loop/STATE.json
+  .loop/STATE.json                  .gitattributes
   ```
 
   `CLAUDE.md` (contrato del supervisor) y `AGENTS.md` (contrato global de los
   agentes) estan protegidos por la misma razon que `.loop/scripts/`: un
   implementer no puede reescribir las reglas que lo gobiernan. Un intento
   termina en HUMAN_GATE con exit code 6.
+
+  `.gitattributes` esta protegido por la misma razon: fija `*.sh text eol=lf`
+  para que los scripts del harness siempre normalicen a LF en el working tree,
+  sin importar el `core.autocrlf` local de cada maquina. Un jq.exe nativo de
+  Windows que emite CRLF ya rompio en produccion el matching de
+  `allowed_paths`/`forbidden_paths` y el veredicto del reviewer (ver
+  `fix: normalize jq output across platforms`); el mismo tipo de problema
+  puede reaparecer si un `.sh` del harness termina con CRLF. Un implementer
+  no puede relajar esta politica de line endings.
 - La comparacion es case-insensitive y **literal**: no se hace globbing sobre el
   texto de la regla, asi que una regla no puede ensancharse sola.
 - El scope se calcula **solo** desde Git (`git diff` + `git ls-files`).
