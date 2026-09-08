@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 12,
+  "iteration": 13,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -16,14 +16,15 @@
     "AUTH-006-B",
     "AUTH-007-A",
     "AUTH-007-B",
-    "AUTH-008-A"
+    "AUTH-008-A",
+    "AUTH-009-A"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-008-A",
+    "task_id": "AUTH-009-A",
     "verdict": "approve",
-    "summary": "The complete diff satisfies AUTH-008-A and remains confined to src/core/. Expected Core 4xx errors are preserved only through explicit trusted declarations; undeclared, malformed, 401, 5xx, timeout, and network failures are sanitized as required. Every envelope uses the caller-provided requestId, no upstream details are exposed, and CoreClient behavior is unchanged. The build and Prisma validation passed.",
-    "reviewed_at": "2026-09-08T21:10:26Z",
+    "summary": "The diff is complete and limited to prisma/schema.prisma. It defines the required noktos_auth API credential and scope models with constrained test/live and active/revoked enums, required agent identity, hash-only secret storage, lifecycle metadata, unique key hashes, duplicate-scope prevention, and cascading scope deletion. public.UserInfo remains unchanged. Build and Prisma validation passed.",
+    "reviewed_at": "2026-09-08T21:20:38Z",
     "provider": "codex"
   },
   "notes": [
@@ -33,7 +34,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 12,
+    "slot": 13,
     "last_provider": "codex",
     "claude_review_every": 0
   }

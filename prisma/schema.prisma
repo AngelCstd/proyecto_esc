@@ -7,6 +7,51 @@ datasource db {
   schemas  = ["public", "noktos_auth"]
 }
 
+enum ApiCredentialEnvironment {
+  test
+  live
+
+  @@map("api_credential_environment")
+  @@schema("noktos_auth")
+}
+
+enum ApiCredentialStatus {
+  active
+  revoked
+
+  @@map("api_credential_status")
+  @@schema("noktos_auth")
+}
+
+model ApiCredential {
+  id              String                   @id @default(uuid()) @db.Uuid
+  agentId         String                   @map("agent_id") @db.VarChar
+  name            String                   @db.VarChar
+  environment     ApiCredentialEnvironment
+  keyPrefix       String                   @map("key_prefix") @db.VarChar
+  keyHash         String                   @unique @map("key_hash") @db.VarChar
+  status          ApiCredentialStatus      @default(active)
+  createdByUserId String?                  @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  revokedAt       DateTime?                @map("revoked_at") @db.Timestamptz(6)
+  lastUsedAt      DateTime?                @map("last_used_at") @db.Timestamptz(6)
+  expiresAt       DateTime?                @map("expires_at") @db.Timestamptz(6)
+  scopes          ApiCredentialScope[]
+
+  @@map("api_credentials")
+  @@schema("noktos_auth")
+}
+
+model ApiCredentialScope {
+  credentialId String        @map("credential_id") @db.Uuid
+  scope        String        @db.VarChar
+  credential   ApiCredential @relation(fields: [credentialId], references: [id], onDelete: Cascade)
+
+  @@id([credentialId, scope])
+  @@map("api_credential_scopes")
+  @@schema("noktos_auth")
+}
+
 model UserInfo {
   id         String   @id @db.Uuid
   created_at DateTime @db.Timestamptz(6)
