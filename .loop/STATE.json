@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 7,
+  "iteration": 8,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -11,14 +11,15 @@
     "AUTH-002-A",
     "AUTH-003-A",
     "AUTH-004-A",
-    "AUTH-005-A"
+    "AUTH-005-A",
+    "AUTH-006-A"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-005-A",
+    "task_id": "AUTH-006-A",
     "verdict": "approve",
-    "summary": "The diff adds only the requested framework-independent Principal contract. PrincipalType exactly matches the four authoritative literals; all required fields and types are present; agentId and travelerId remain independently optional and may coexist. No classification, scope mapping, credential handling, persistence, Core integration, or out-of-scope behavior was introduced. Deterministic TypeScript build and Prisma validation both passed.",
-    "reviewed_at": "2026-09-08T19:54:24Z",
+    "summary": "The change meets AUTH-006-A: CORE_BASE_URL is required, validated as an absolute HTTP(S) URL, normalized in the returned configuration, and documented with a local non-production placeholder. The diff is complete and limited to allowed paths. Build and Prisma validation passed, with no architecture or security violations found.",
+    "reviewed_at": "2026-09-08T20:08:19Z",
     "provider": "codex"
   },
   "notes": [
@@ -28,7 +29,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 7,
+    "slot": 8,
     "last_provider": "codex",
     "claude_review_every": 0
   }

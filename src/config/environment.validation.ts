@@ -8,6 +8,7 @@ export interface EnvironmentConfig {
   DATABASE_URL: string;
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
+  CORE_BASE_URL: string;
 }
 
 function requireNonEmptyString(
@@ -53,6 +54,7 @@ export function validateEnvironment(
     environment,
     'SUPABASE_ANON_KEY',
   );
+  const coreBaseUrl = requireNonEmptyString(environment, 'CORE_BASE_URL');
 
   let parsedSupabaseUrl: URL;
   try {
@@ -69,11 +71,27 @@ export function validateEnvironment(
     );
   }
 
+  let parsedCoreBaseUrl: URL;
+  try {
+    parsedCoreBaseUrl = new URL(coreBaseUrl);
+  } catch {
+    throw new Error(
+      'Invalid application configuration: CORE_BASE_URL must be a valid URL',
+    );
+  }
+
+  if (!['http:', 'https:'].includes(parsedCoreBaseUrl.protocol)) {
+    throw new Error(
+      'Invalid application configuration: CORE_BASE_URL must use HTTP or HTTPS',
+    );
+  }
+
   return {
     NODE_ENV: nodeEnvironment as NodeEnvironment,
     PORT: port,
     DATABASE_URL: databaseUrl,
     SUPABASE_URL: supabaseUrl,
     SUPABASE_ANON_KEY: supabaseAnonKey,
+    CORE_BASE_URL: parsedCoreBaseUrl.toString(),
   };
 }
