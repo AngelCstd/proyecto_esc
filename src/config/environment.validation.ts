@@ -9,6 +9,7 @@ export interface EnvironmentConfig {
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
   CORE_BASE_URL: string;
+  CORE_REQUEST_TIMEOUT_MS: number;
 }
 
 function requireNonEmptyString(
@@ -55,6 +56,20 @@ export function validateEnvironment(
     'SUPABASE_ANON_KEY',
   );
   const coreBaseUrl = requireNonEmptyString(environment, 'CORE_BASE_URL');
+  const rawCoreRequestTimeout = environment.CORE_REQUEST_TIMEOUT_MS;
+  const coreRequestTimeoutMs =
+    typeof rawCoreRequestTimeout === 'number'
+      ? rawCoreRequestTimeout
+      : typeof rawCoreRequestTimeout === 'string' &&
+          /^\d+$/.test(rawCoreRequestTimeout)
+        ? Number(rawCoreRequestTimeout)
+        : Number.NaN;
+
+  if (!Number.isInteger(coreRequestTimeoutMs) || coreRequestTimeoutMs <= 0) {
+    throw new Error(
+      'Invalid application configuration: CORE_REQUEST_TIMEOUT_MS must be a positive integer',
+    );
+  }
 
   let parsedSupabaseUrl: URL;
   try {
@@ -93,5 +108,6 @@ export function validateEnvironment(
     SUPABASE_URL: supabaseUrl,
     SUPABASE_ANON_KEY: supabaseAnonKey,
     CORE_BASE_URL: parsedCoreBaseUrl.toString(),
+    CORE_REQUEST_TIMEOUT_MS: coreRequestTimeoutMs,
   };
 }
