@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 8,
+  "iteration": 9,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -12,14 +12,15 @@
     "AUTH-003-A",
     "AUTH-004-A",
     "AUTH-005-A",
-    "AUTH-006-A"
+    "AUTH-006-A",
+    "AUTH-006-B"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-006-A",
+    "task_id": "AUTH-006-B",
     "verdict": "approve",
-    "summary": "The change meets AUTH-006-A: CORE_BASE_URL is required, validated as an absolute HTTP(S) URL, normalized in the returned configuration, and documented with a local non-production placeholder. The diff is complete and limited to allowed paths. Build and Prisma validation passed, with no architecture or security violations found.",
-    "reviewed_at": "2026-09-08T20:08:19Z",
+    "summary": "The implementation satisfies AUTH-006-B and the architecture contracts. AppClient centralizes outbound HTTP, enforces relative paths and a fixed base boundary, propagates request IDs, invokes the injected auth strategy, handles JSON/empty/non-JSON bodies, preserves completed HTTP statuses, and exposes sanitized distinguishable transport errors. Changes are confined to src/app-client/, and deterministic build and Prisma validation passed.",
+    "reviewed_at": "2026-09-08T20:25:30Z",
     "provider": "codex"
   },
   "notes": [
@@ -29,7 +30,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 8,
+    "slot": 9,
     "last_provider": "codex",
     "claude_review_every": 0
   }
