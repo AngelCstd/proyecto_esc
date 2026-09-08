@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 6,
+  "iteration": 7,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -10,14 +10,15 @@
     "AUTH-001-B",
     "AUTH-002-A",
     "AUTH-003-A",
-    "AUTH-004-A"
+    "AUTH-004-A",
+    "AUTH-005-A"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-004-A",
+    "task_id": "AUTH-005-A",
     "verdict": "approve",
-    "summary": "The change satisfies AUTH-004-A and complies with the architecture and Prisma safety constraints. It adds a lifecycle-managed Prisma boundary using validated DATABASE_URL, implements a read-only user_info lookup by trusted user ID, preserves all nullable identity fields, registers the repository correctly, stays within allowed paths, and passes both TypeScript build and Prisma validation.",
-    "reviewed_at": "2026-09-08T19:41:02Z",
+    "summary": "The diff adds only the requested framework-independent Principal contract. PrincipalType exactly matches the four authoritative literals; all required fields and types are present; agentId and travelerId remain independently optional and may coexist. No classification, scope mapping, credential handling, persistence, Core integration, or out-of-scope behavior was introduced. Deterministic TypeScript build and Prisma validation both passed.",
+    "reviewed_at": "2026-09-08T19:54:24Z",
     "provider": "codex"
   },
   "notes": [
@@ -27,7 +28,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 6,
+    "slot": 7,
     "last_provider": "codex",
     "claude_review_every": 0
   }
