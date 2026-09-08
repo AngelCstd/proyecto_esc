@@ -2,19 +2,20 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 3,
+  "iteration": 4,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
     "AUTH-001-A",
-    "AUTH-001-B"
+    "AUTH-001-B",
+    "AUTH-002-A"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-001-B",
+    "task_id": "AUTH-002-A",
     "verdict": "approve",
-    "summary": "The change satisfies AUTH-001-B. It adds framework-neutral error-envelope and request-context interfaces with the required string fields, exports both through the src/common barrel, remains entirely within the allowed path, introduces no runtime behavior or architectural coupling, and passes the deterministic TypeScript build.",
-    "reviewed_at": "2026-09-08T16:37:41Z",
+    "summary": "The complete, non-truncated diff satisfies AUTH-002-A and the architecture constraints. Prisma 7.10 CLI/Client versions remain compatible; PostgreSQL multi-schema configuration declares public and noktos_auth; public.user_info is mapped with the documented types, nullability, keys, and schema/table names; and the installed Prisma configuration explicitly supports and enables external-table protection for public.user_info. No migrations, database operations, production credentials, owned security models, or out-of-scope behavior were introduced. Deterministic TypeScript build and Prisma validation both passed.",
+    "reviewed_at": "2026-09-08T17:28:09Z",
     "provider": "codex"
   },
   "notes": [
@@ -24,7 +25,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 3,
+    "slot": 4,
     "last_provider": "codex",
     "claude_review_every": 0
   }
