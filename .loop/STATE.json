@@ -2,20 +2,21 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 4,
+  "iteration": 5,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
     "AUTH-001-A",
     "AUTH-001-B",
-    "AUTH-002-A"
+    "AUTH-002-A",
+    "AUTH-003-A"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-002-A",
+    "task_id": "AUTH-003-A",
     "verdict": "approve",
-    "summary": "The complete, non-truncated diff satisfies AUTH-002-A and the architecture constraints. Prisma 7.10 CLI/Client versions remain compatible; PostgreSQL multi-schema configuration declares public and noktos_auth; public.user_info is mapped with the documented types, nullability, keys, and schema/table names; and the installed Prisma configuration explicitly supports and enables external-table protection for public.user_info. No migrations, database operations, production credentials, owned security models, or out-of-scope behavior were introduced. Deterministic TypeScript build and Prisma validation both passed.",
-    "reviewed_at": "2026-09-08T17:28:09Z",
+    "summary": "The change meets AUTH-003-A acceptance criteria and architecture requirements. It adds a singleton, server-configured Supabase client; validates tokens through Supabase Auth; returns only the trusted user ID; consistently sanitizes authentication failures; introduces no token logging, persistence, database changes, Core access, or out-of-scope behavior; and modifies only allowed paths. Deterministic TypeScript build and Prisma validation both passed.",
+    "reviewed_at": "2026-09-08T18:06:43Z",
     "provider": "codex"
   },
   "notes": [
@@ -25,7 +26,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 4,
+    "slot": 5,
     "last_provider": "codex",
     "claude_review_every": 0
   }

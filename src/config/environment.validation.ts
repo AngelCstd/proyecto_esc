@@ -5,6 +5,21 @@ type NodeEnvironment = (typeof NODE_ENVIRONMENTS)[number];
 export interface EnvironmentConfig {
   NODE_ENV: NodeEnvironment;
   PORT: number;
+  SUPABASE_URL: string;
+  SUPABASE_ANON_KEY: string;
+}
+
+function requireNonEmptyString(
+  environment: Record<string, unknown>,
+  name: string,
+): string {
+  const value = environment[name];
+
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    throw new Error(`Invalid application configuration: ${name} is required`);
+  }
+
+  return value.trim();
 }
 
 export function validateEnvironment(
@@ -31,8 +46,31 @@ export function validateEnvironment(
     throw new Error('Invalid application configuration: PORT must be valid');
   }
 
+  const supabaseUrl = requireNonEmptyString(environment, 'SUPABASE_URL');
+  const supabaseAnonKey = requireNonEmptyString(
+    environment,
+    'SUPABASE_ANON_KEY',
+  );
+
+  let parsedSupabaseUrl: URL;
+  try {
+    parsedSupabaseUrl = new URL(supabaseUrl);
+  } catch {
+    throw new Error(
+      'Invalid application configuration: SUPABASE_URL must be a valid URL',
+    );
+  }
+
+  if (!['http:', 'https:'].includes(parsedSupabaseUrl.protocol)) {
+    throw new Error(
+      'Invalid application configuration: SUPABASE_URL must use HTTP or HTTPS',
+    );
+  }
+
   return {
     NODE_ENV: nodeEnvironment as NodeEnvironment,
     PORT: port,
+    SUPABASE_URL: supabaseUrl,
+    SUPABASE_ANON_KEY: supabaseAnonKey,
   };
 }
