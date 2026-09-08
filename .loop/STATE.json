@@ -2,18 +2,19 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 2,
+  "iteration": 3,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
-    "AUTH-001-A"
+    "AUTH-001-A",
+    "AUTH-001-B"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-001-A",
+    "task_id": "AUTH-001-B",
     "verdict": "approve",
-    "summary": "The complete diff is confined to allowed paths and satisfies AUTH-001-A. Configuration is globally registered with caching, validation normalizes NODE_ENV and PORT with correct defaults and bounds, bootstrap resolves PORT through ConfigService without direct environment access, .env.example contains only non-secret placeholders, dependencies are consistent, and deterministic build verification passed.",
-    "reviewed_at": "2026-09-07T20:38:00Z",
+    "summary": "The change satisfies AUTH-001-B. It adds framework-neutral error-envelope and request-context interfaces with the required string fields, exports both through the src/common barrel, remains entirely within the allowed path, introduces no runtime behavior or architectural coupling, and passes the deterministic TypeScript build.",
+    "reviewed_at": "2026-09-08T16:37:41Z",
     "provider": "codex"
   },
   "notes": [
@@ -23,7 +24,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 2,
+    "slot": 3,
     "last_provider": "codex",
     "claude_review_every": 0
   }
