@@ -128,6 +128,48 @@ ensure_local_excludes() {
   done
 }
 
+# ---------------------------------------------------------------------------
+# jq output normalization
+#
+# A native Windows jq build (opened via the C runtime's default text mode)
+# emits CRLF line endings even for -r/raw output, while every Unix jq emits
+# LF only. Nothing downstream in this file strips a trailing \r: not
+# `read -r`, not command substitution, not string comparisons like
+# `[ "$verdict" = "approve" ]` or the "src/foo/" directory-rule matcher in
+# path_matches_rule. Left unhandled, a CRLF-emitting jq silently breaks
+# path-rule matching (a real scope violation is indistinguishable from a
+# false one) AND every jq-derived string comparison in the loop, including
+# the reviewer verdict check that gates every commit.
+#
+# jq_run is the ONLY way this script invokes jq. It prefers -b/--binary
+# (jq >=1.7) to stop the CRLF translation at the source, and always strips
+# one trailing \r per output line as a portable fallback - so behaviour is
+# identical whether the underlying jq emits LF or CRLF, and whether or not
+# -b is supported. It preserves jq's own exit status (not sed's), the same
+# PIPESTATUS discipline verify.sh already uses so a masked pipe never turns
+# a real failure into a false pass.
+# ---------------------------------------------------------------------------
+
+JQ_SUPPORTS_BINARY=""
+
+jq_run() {
+  if [ -z "$JQ_SUPPORTS_BINARY" ]; then
+    if jq -b -n '.' >/dev/null 2>&1; then
+      JQ_SUPPORTS_BINARY=1
+    else
+      JQ_SUPPORTS_BINARY=0
+    fi
+  fi
+  local rc
+  if [ "$JQ_SUPPORTS_BINARY" -eq 1 ]; then
+    jq -b "$@" | sed 's/\r$//'
+  else
+    jq "$@" | sed 's/\r$//'
+  fi
+  rc=${PIPESTATUS[0]}
+  return "$rc"
+}
+
 # The ONLY source of truth for scope enforcement. worker.files_changed is
 # self-reported by the agent and is never trusted for enforcement; it stays in
 # the run artifacts for auditing only.
@@ -148,7 +190,7 @@ read_lines_into_reply() {
   while IFS= read -r line; do
     [ -n "$line" ] || continue
     REPLY_LINES[${#REPLY_LINES[@]}]="$line"
-  done < <(jq -r "$filter" "$file" 2>/dev/null)
+  done < <(jq_run -r "$filter" "$file" 2>/dev/null)
 }
 
 # ---------------------------------------------------------------------------
@@ -410,11 +452,11 @@ provider_available() {
 # Strips optional markdown code fences and validates that the result is JSON.
 extract_json() {
   local src="$1" dest="$2"
-  if jq -e . "$src" > "$dest" 2>/dev/null; then
+  if jq_run -e . "$src" > "$dest" 2>/dev/null; then
     return 0
   fi
   sed -e 's/^[[:space:]]*```[a-zA-Z]*[[:space:]]*$//' -e 's/^[[:space:]]*```[[:space:]]*$//' "$src" \
-    | jq -e . > "$dest" 2>/dev/null
+    | jq_run -e . > "$dest" 2>/dev/null
 }
 
 invoke_agent() {
@@ -477,7 +519,7 @@ invoke_agent() {
       return "$rc"
     fi
     local unwrapped="$run_dir/${role}.claude.structured.json"
-    if ! jq -e '.structured_output' "$raw_file" > "$unwrapped" 2>/dev/null; then
+    if ! jq_run -e '.structured_output' "$raw_file" > "$unwrapped" 2>/dev/null; then
       echo "[error] claude $role returned JSON but no structured_output field." >&2
       return 1
     fi
@@ -523,7 +565,7 @@ read_rotation_slot() {
   fi
   if [ -z "$slot" ]; then
     # Self-healing: fall back to the audit mirror in STATE.json, then to zero.
-    slot="$(jq -r '.reviewer_rotation.slot // 0' "$STATE_PATH" 2>/dev/null | tr -cd '0-9')"
+    slot="$(jq_run -r '.reviewer_rotation.slot // 0' "$STATE_PATH" 2>/dev/null | tr -cd '0-9')"
   fi
   [ -n "$slot" ] || slot=0
   echo "$slot"
@@ -540,9 +582,9 @@ resolve_reviewer_for_task() {
 
   if [ -f "$ROTATION_CURRENT_FILE" ]; then
     local pinned_task pinned_provider pinned_slot
-    pinned_task="$(jq -r '.task_id // ""' "$ROTATION_CURRENT_FILE" 2>/dev/null)"
-    pinned_provider="$(jq -r '.provider // ""' "$ROTATION_CURRENT_FILE" 2>/dev/null)"
-    pinned_slot="$(jq -r '.slot // 0' "$ROTATION_CURRENT_FILE" 2>/dev/null)"
+    pinned_task="$(jq_run -r '.task_id // ""' "$ROTATION_CURRENT_FILE" 2>/dev/null)"
+    pinned_provider="$(jq_run -r '.provider // ""' "$ROTATION_CURRENT_FILE" 2>/dev/null)"
+    pinned_slot="$(jq_run -r '.slot // 0' "$ROTATION_CURRENT_FILE" 2>/dev/null)"
     if [ -n "$pinned_task" ] && [ "$pinned_task" = "$task_id" ] && [ -n "$pinned_provider" ]; then
       REVIEW_PROVIDER="$pinned_provider"
       REVIEW_SLOT="$pinned_slot"
@@ -566,7 +608,7 @@ resolve_reviewer_for_task() {
       ;;
   esac
 
-  jq -n --arg t "$task_id" --arg p "$REVIEW_PROVIDER" --argjson s "$REVIEW_SLOT" \
+  jq_run -n --arg t "$task_id" --arg p "$REVIEW_PROVIDER" --argjson s "$REVIEW_SLOT" \
     '{task_id:$t, provider:$p, slot:$s}' > "$ROTATION_CURRENT_FILE.tmp" \
     && mv "$ROTATION_CURRENT_FILE.tmp" "$ROTATION_CURRENT_FILE"
 
@@ -624,34 +666,34 @@ write_task_packet() {
   local task_json="$run_dir/task.json"
   local task_md="$run_dir/task.md"
 
-  jq '.task' "$decision_file" > "$task_json" || die "Could not extract task from architect decision."
+  jq_run '.task' "$decision_file" > "$task_json" || die "Could not extract task from architect decision."
 
   {
-    echo "# Task $(jq -r '.id // ""' "$task_json")"
+    echo "# Task $(jq_run -r '.id // ""' "$task_json")"
     echo
-    echo "Parent backlog: $(jq -r '.parent_backlog_id // ""' "$task_json")"
-    echo "Risk: $(jq -r '.risk // ""' "$task_json")"
+    echo "Parent backlog: $(jq_run -r '.parent_backlog_id // ""' "$task_json")"
+    echo "Risk: $(jq_run -r '.risk // ""' "$task_json")"
     echo
     echo "## Title"
-    jq -r '.title // ""' "$task_json"
+    jq_run -r '.title // ""' "$task_json"
     echo
     echo "## Objective"
-    jq -r '.objective // ""' "$task_json"
+    jq_run -r '.objective // ""' "$task_json"
     echo
     echo "## Allowed paths"
-    jq -r '(.allowed_paths // [])[] | "- " + .' "$task_json"
+    jq_run -r '(.allowed_paths // [])[] | "- " + .' "$task_json"
     echo
     echo "## Forbidden paths"
-    jq -r '(.forbidden_paths // [])[] | "- " + .' "$task_json"
+    jq_run -r '(.forbidden_paths // [])[] | "- " + .' "$task_json"
     echo
     echo "## Requirements"
-    jq -r '(.requirements // [])[] | "- " + .' "$task_json"
+    jq_run -r '(.requirements // [])[] | "- " + .' "$task_json"
     echo
     echo "## Acceptance"
-    jq -r '(.acceptance // [])[] | "- " + .' "$task_json"
+    jq_run -r '(.acceptance // [])[] | "- " + .' "$task_json"
     echo
     echo "## Notes"
-    jq -r '(.notes // [])[] | "- " + .' "$task_json"
+    jq_run -r '(.notes // [])[] | "- " + .' "$task_json"
   } > "$task_md"
 
   echo "$task_md"
@@ -674,7 +716,7 @@ write_human_gate() {
     echo
     echo "## Questions"
     if [ -n "$questions_json" ]; then
-      echo "$questions_json" | jq -r '.[]? | "- " + .' 2>/dev/null
+      echo "$questions_json" | jq_run -r '.[]? | "- " + .' 2>/dev/null
     fi
     echo
     echo "## Continue"
@@ -727,14 +769,14 @@ write_batch_boundary() {
 approve_and_commit() {
   local task_file="$1" review_file="$2" provider="$3" slot="$4"
   local task_id title verdict summary ts tmp
-  task_id="$(jq -r '.id // ""' "$task_file")"
-  title="$(jq -r '.title // ""' "$task_file")"
-  verdict="$(jq -r '.verdict // ""' "$review_file")"
-  summary="$(jq -r '.summary // ""' "$review_file")"
+  task_id="$(jq_run -r '.id // ""' "$task_file")"
+  title="$(jq_run -r '.title // ""' "$task_file")"
+  verdict="$(jq_run -r '.verdict // ""' "$review_file")"
+  summary="$(jq_run -r '.summary // ""' "$review_file")"
   ts="$(now_iso)"
   tmp="$STATE_PATH.tmp"
 
-  jq \
+  jq_run \
     --arg tid "$task_id" \
     --arg verdict "$verdict" \
     --arg summary "$summary" \
@@ -849,14 +891,14 @@ while [ "$iteration" -le "$MAX_ITERATIONS" ]; do
     die "Architect invocation failed. See $run_dir"
   fi
 
-  action="$(jq -r '.action // ""' "$architect_decision")"
-  reason="$(jq -r '.reason // ""' "$architect_decision")"
-  questions="$(jq -c '.questions // []' "$architect_decision")"
+  action="$(jq_run -r '.action // ""' "$architect_decision")"
+  reason="$(jq_run -r '.reason // ""' "$architect_decision")"
+  questions="$(jq_run -c '.questions // []' "$architect_decision")"
 
   case "$action" in
     complete)
       tmp="$STATE_PATH.tmp"
-      jq '.status = "READY_FOR_HUMAN_REVIEW"' "$STATE_PATH" > "$tmp" || die "Failed to update STATE.json."
+      jq_run '.status = "READY_FOR_HUMAN_REVIEW"' "$STATE_PATH" > "$tmp" || die "Failed to update STATE.json."
       mv "$tmp" "$STATE_PATH"
       git add "$STATE_PATH" || die "git add failed."
       git commit -m "chore(loop): mark Noktos Auth ready for human review" || die "Failed to commit final loop state."
@@ -873,7 +915,7 @@ while [ "$iteration" -le "$MAX_ITERATIONS" ]; do
       exit 3
       ;;
     dispatch)
-      if [ "$(jq -r '.task | type' "$architect_decision")" = "null" ]; then
+      if [ "$(jq_run -r '.task | type' "$architect_decision")" = "null" ]; then
         die "Architect returned dispatch without task."
       fi
       ;;
@@ -884,8 +926,8 @@ while [ "$iteration" -le "$MAX_ITERATIONS" ]; do
 
   task_packet="$(write_task_packet "$architect_decision" "$run_dir")"
   task_file="$run_dir/task.json"
-  task_id="$(jq -r '.id // ""' "$task_file")"
-  task_title="$(jq -r '.title // ""' "$task_file")"
+  task_id="$(jq_run -r '.id // ""' "$task_file")"
+  task_title="$(jq_run -r '.title // ""' "$task_file")"
   write_step "Task: $task_id - $task_title"
 
   # Reject an unsupported path-rule language before any code is written.
@@ -905,7 +947,7 @@ while [ "$iteration" -le "$MAX_ITERATIONS" ]; do
   resolve_reviewer_for_task "$task_id"
   if ! provider_available "$REVIEW_PROVIDER"; then
     write_human_gate "Reviewer provider '$REVIEW_PROVIDER' was selected for task $task_id (slot $REVIEW_SLOT) but its CLI is not installed. No implementation was executed. This harness never installs anything automatically." \
-      "$(jq -n --arg p "$REVIEW_PROVIDER" '["Install the " + $p + " CLI yourself and re-run; the provider stays pinned to this task.", "Or set CLAUDE_REVIEW_EVERY=0 / REVIEWER_MODE=codex, delete .loop/runs/reviewer-current.json, and re-run."]')" \
+      "$(jq_run -n --arg p "$REVIEW_PROVIDER" '["Install the " + $p + " CLI yourself and re-run; the provider stays pinned to this task.", "Or set CLAUDE_REVIEW_EVERY=0 / REVIEWER_MODE=codex, delete .loop/runs/reviewer-current.json, and re-run."]')" \
       "$run_dir"
     exit 10
   fi
@@ -946,10 +988,10 @@ while [ "$iteration" -le "$MAX_ITERATIONS" ]; do
       exit 4
     fi
 
-    worker_status="$(jq -r '.status // ""' "$worker_out")"
+    worker_status="$(jq_run -r '.status // ""' "$worker_out")"
     if [ "$worker_status" = "human_gate" ] || [ "$worker_status" = "blocked" ]; then
-      write_human_gate "$(jq -r '.summary // ""' "$worker_out")" \
-        "$(jq -c '.questions // []' "$worker_out")" "$run_dir"
+      write_human_gate "$(jq_run -r '.summary // ""' "$worker_out")" \
+        "$(jq_run -c '.questions // []' "$worker_out")" "$run_dir"
       exit 5
     fi
 
@@ -993,7 +1035,7 @@ while [ "$iteration" -le "$MAX_ITERATIONS" ]; do
       die "Reviewer invocation failed on attempt $attempt. See $run_dir"
     fi
 
-    verdict="$(jq -r '.verdict // ""' "$review_out")"
+    verdict="$(jq_run -r '.verdict // ""' "$review_out")"
 
     if [ "$verdict" = "approve" ] && [ "$verification_exit" -eq 0 ]; then
       approve_and_commit "$task_file" "$review_out" "$REVIEW_PROVIDER" "$REVIEW_SLOT"
@@ -1003,8 +1045,8 @@ while [ "$iteration" -le "$MAX_ITERATIONS" ]; do
     fi
 
     if [ "$verdict" = "human_gate" ]; then
-      write_human_gate "$(jq -r '.summary // ""' "$review_out")" \
-        "$(jq -c '.questions // []' "$review_out")" "$run_dir"
+      write_human_gate "$(jq_run -r '.summary // ""' "$review_out")" \
+        "$(jq_run -c '.questions // []' "$review_out")" "$run_dir"
       exit 7
     fi
 
