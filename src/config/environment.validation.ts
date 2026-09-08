@@ -5,6 +5,7 @@ type NodeEnvironment = (typeof NODE_ENVIRONMENTS)[number];
 export interface EnvironmentConfig {
   NODE_ENV: NodeEnvironment;
   PORT: number;
+  DATABASE_URL: string;
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
 }
@@ -47,6 +48,7 @@ export function validateEnvironment(
   }
 
   const supabaseUrl = requireNonEmptyString(environment, 'SUPABASE_URL');
+  const databaseUrl = requireNonEmptyString(environment, 'DATABASE_URL');
   const supabaseAnonKey = requireNonEmptyString(
     environment,
     'SUPABASE_ANON_KEY',
@@ -70,6 +72,7 @@ export function validateEnvironment(
   return {
     NODE_ENV: nodeEnvironment as NodeEnvironment,
     PORT: port,
+    DATABASE_URL: databaseUrl,
     SUPABASE_URL: supabaseUrl,
     SUPABASE_ANON_KEY: supabaseAnonKey,
   };

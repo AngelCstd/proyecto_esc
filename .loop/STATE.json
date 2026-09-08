@@ -2,21 +2,22 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 5,
+  "iteration": 6,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
     "AUTH-001-A",
     "AUTH-001-B",
     "AUTH-002-A",
-    "AUTH-003-A"
+    "AUTH-003-A",
+    "AUTH-004-A"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-003-A",
+    "task_id": "AUTH-004-A",
     "verdict": "approve",
-    "summary": "The change meets AUTH-003-A acceptance criteria and architecture requirements. It adds a singleton, server-configured Supabase client; validates tokens through Supabase Auth; returns only the trusted user ID; consistently sanitizes authentication failures; introduces no token logging, persistence, database changes, Core access, or out-of-scope behavior; and modifies only allowed paths. Deterministic TypeScript build and Prisma validation both passed.",
-    "reviewed_at": "2026-09-08T18:06:43Z",
+    "summary": "The change satisfies AUTH-004-A and complies with the architecture and Prisma safety constraints. It adds a lifecycle-managed Prisma boundary using validated DATABASE_URL, implements a read-only user_info lookup by trusted user ID, preserves all nullable identity fields, registers the repository correctly, stays within allowed paths, and passes both TypeScript build and Prisma validation.",
+    "reviewed_at": "2026-09-08T19:41:02Z",
     "provider": "codex"
   },
   "notes": [
@@ -26,7 +27,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 5,
+    "slot": 6,
     "last_provider": "codex",
     "claude_review_every": 0
   }

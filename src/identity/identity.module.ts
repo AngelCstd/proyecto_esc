@@ -1,14 +1,18 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+import { DatabaseModule } from '../database/database.module';
 import { HUMAN_IDENTITY_VERIFIER } from './human-identity-verifier';
+import { PrismaUserInfoRepository } from './prisma-user-info.repository';
 import {
   createSupabaseClient,
   SUPABASE_CLIENT,
 } from './supabase-client.provider';
 import { SupabaseHumanIdentityVerifier } from './supabase-human-identity-verifier.service';
+import { UserInfoRepository } from './user-info.repository';
 
 @Module({
+  imports: [DatabaseModule],
   providers: [
     {
       provide: SUPABASE_CLIENT,
@@ -20,7 +24,16 @@ import { SupabaseHumanIdentityVerifier } from './supabase-human-identity-verifie
       provide: HUMAN_IDENTITY_VERIFIER,
       useExisting: SupabaseHumanIdentityVerifier,
     },
+    PrismaUserInfoRepository,
+    {
+      provide: UserInfoRepository,
+      useExisting: PrismaUserInfoRepository,
+    },
   ],
-  exports: [HUMAN_IDENTITY_VERIFIER, SupabaseHumanIdentityVerifier],
+  exports: [
+    HUMAN_IDENTITY_VERIFIER,
+    SupabaseHumanIdentityVerifier,
+    UserInfoRepository,
+  ],
 })
 export class IdentityModule {}
