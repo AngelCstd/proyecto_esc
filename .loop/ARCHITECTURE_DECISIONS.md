@@ -205,6 +205,32 @@ Nota factual asociada: el valor real del rol intermedio es `reservante`. Los doc
 autoritativos decian `reservan` por error hasta esta fecha; se corrigio en D-007, en Q-001 y en
 `GOAL.md` junto con esta decision.
 
+## D-019 - Transporte publico de credenciales de API Key
+
+Decision humana registrada el 2026-09-10, en respuesta a un HUMAN_GATE del Architect.
+
+Las API Keys de socios viajan en el mismo header estandar que las sesiones humanas:
+
+```text
+Authorization: Bearer <credencial>
+```
+
+Reglas de desambiguacion, obligatorias y deterministas:
+
+- Si el valor del Bearer empieza con `nok_test_` o `nok_live_` -> se trata EXCLUSIVAMENTE como
+  API Key.
+- En cualquier otro caso -> se trata EXCLUSIVAMENTE como access token de Supabase.
+- Una misma credencial NUNCA se intenta por ambas vias. La via se decide una sola vez, por forma,
+  ANTES de validar.
+- Si la credencial falla en su via, la peticion se rechaza. NO se reintenta por la otra via.
+
+Razon: permitir fallback entre vias convertiria un fallo de validacion en un oraculo para
+adivinar credenciales y abriria confusion de identidades. La via se decide por forma, nunca por
+resultado.
+
+El prefijo `nok_test_`/`nok_live_` queda como parte del CONTRATO PUBLICO: cambiarlo rompe la
+desambiguacion y rompe a los integradores existentes.
+
 ## OPEN - solo cuando la implementacion llegue a estas piezas
 
 ### Q-001 - Permisos exactos por rol humano
