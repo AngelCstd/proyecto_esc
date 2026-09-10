@@ -231,6 +231,48 @@ resultado.
 El prefijo `nok_test_`/`nok_live_` queda como parte del CONTRATO PUBLICO: cambiarlo rompe la
 desambiguacion y rompe a los integradores existentes.
 
+## D-020 - Destino de despliegue serverless (Vercel) y sus consecuencias
+
+Decision humana registrada el 2026-09-10.
+
+Noktos Auth se desplegara en **Vercel (serverless)**. Consecuencia estructural: **no existe
+estado compartido en memoria entre peticiones**. Cada invocacion puede ejecutarse en una
+instancia distinta y las instancias se reciclan solas.
+
+Por lo tanto, queda PROHIBIDO para el loop implementar funcionalidad que dependa de estado
+en memoria del proceso entre peticiones. En concreto y sin limitarse a ello:
+
+- rate limiting con contadores en memoria
+- cache en memoria del proceso
+- cualquier acumulador, sesion o contador que deba sobrevivir entre invocaciones
+
+Si una tarea requiere ese tipo de estado, el Architect debe devolver **HUMAN_GATE** en lugar de
+elegir un backend por su cuenta. La eleccion del almacen compartido (Upstash/Redis, Vercel KV u
+otro) es una decision humana pendiente.
+
+### Efecto sobre AUTH-015
+
+`AUTH-015` tenia dos mitades:
+
+- **logging seguro de credenciales** -> COMPLETADO en `AUTH-015-A` (`78b0141`). Es compatible con
+  serverless, no requiere estado compartido.
+- **rate limiting** -> DIFERIDO. La implementacion producida se aparto sin aprobar en la rama
+  `deferred/rate-limiting` (commit `2fea86b`); ver `PENDIENTES.md` y `RAMA_RATE_LIMITING.md`.
+
+A efectos de dependencias del backlog, **`AUTH-015` se considera satisfecho por `AUTH-015-A`**,
+de modo que `AUTH-016` (audit events) NO queda bloqueado. `AUTH-016` persiste en base de datos,
+lo cual si es compatible con serverless.
+
+**No volver a despachar rate limiting** hasta que exista la decision humana del backend de estado
+compartido.
+
+### Pendiente asociado, no resuelto aqui
+
+En serverless, cada invocacion puede abrir su propia conexion a Postgres y agotar el limite de
+conexiones de Supabase. Existe un endpoint de connection pooler para ese escenario. No se ha
+investigado ni configurado; queda anotado en `PENDIENTES.md` como verificacion previa al primer
+despliegue real, no como tarea del loop.
+
 ## OPEN - solo cuando la implementacion llegue a estas piezas
 
 ### Q-001 - Permisos exactos por rol humano
