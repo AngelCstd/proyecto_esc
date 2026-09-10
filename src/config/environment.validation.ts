@@ -10,6 +10,8 @@ export interface EnvironmentConfig {
   SUPABASE_ANON_KEY: string;
   CORE_BASE_URL: string;
   CORE_REQUEST_TIMEOUT_MS: number;
+  RATE_LIMIT_WINDOW_MS: number;
+  RATE_LIMIT_REQUEST_COUNT: number;
 }
 
 function requireNonEmptyString(
@@ -23,6 +25,27 @@ function requireNonEmptyString(
   }
 
   return value.trim();
+}
+
+function requirePositiveInteger(
+  environment: Record<string, unknown>,
+  name: string,
+): number {
+  const rawValue = environment[name];
+  const value =
+    typeof rawValue === 'number'
+      ? rawValue
+      : typeof rawValue === 'string' && /^\d+$/.test(rawValue)
+        ? Number(rawValue)
+        : Number.NaN;
+
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error(
+      `Invalid application configuration: ${name} must be a positive integer`,
+    );
+  }
+
+  return value;
 }
 
 export function validateEnvironment(
@@ -56,20 +79,18 @@ export function validateEnvironment(
     'SUPABASE_ANON_KEY',
   );
   const coreBaseUrl = requireNonEmptyString(environment, 'CORE_BASE_URL');
-  const rawCoreRequestTimeout = environment.CORE_REQUEST_TIMEOUT_MS;
-  const coreRequestTimeoutMs =
-    typeof rawCoreRequestTimeout === 'number'
-      ? rawCoreRequestTimeout
-      : typeof rawCoreRequestTimeout === 'string' &&
-          /^\d+$/.test(rawCoreRequestTimeout)
-        ? Number(rawCoreRequestTimeout)
-        : Number.NaN;
-
-  if (!Number.isInteger(coreRequestTimeoutMs) || coreRequestTimeoutMs <= 0) {
-    throw new Error(
-      'Invalid application configuration: CORE_REQUEST_TIMEOUT_MS must be a positive integer',
-    );
-  }
+  const coreRequestTimeoutMs = requirePositiveInteger(
+    environment,
+    'CORE_REQUEST_TIMEOUT_MS',
+  );
+  const rateLimitWindowMs = requirePositiveInteger(
+    environment,
+    'RATE_LIMIT_WINDOW_MS',
+  );
+  const rateLimitRequestCount = requirePositiveInteger(
+    environment,
+    'RATE_LIMIT_REQUEST_COUNT',
+  );
 
   let parsedSupabaseUrl: URL;
   try {
@@ -109,5 +130,7 @@ export function validateEnvironment(
     SUPABASE_ANON_KEY: supabaseAnonKey,
     CORE_BASE_URL: parsedCoreBaseUrl.toString(),
     CORE_REQUEST_TIMEOUT_MS: coreRequestTimeoutMs,
+    RATE_LIMIT_WINDOW_MS: rateLimitWindowMs,
+    RATE_LIMIT_REQUEST_COUNT: rateLimitRequestCount,
   };
 }
