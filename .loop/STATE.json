@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 18,
+  "iteration": 19,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -22,14 +22,15 @@
     "AUTH-010-B",
     "AUTH-010-C",
     "AUTH-011-A",
-    "AUTH-012-A"
+    "AUTH-012-A",
+    "AUTH-005-B"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-012-A",
+    "task_id": "AUTH-005-B",
     "verdict": "approve",
-    "summary": "The change is confined to src/authorization/, builds successfully, and implements a framework-neutral all-required scope evaluator using exact string matching. Empty requirements authorize, duplicate requirements are handled deterministically, denial exposes only missing scope names, and no role mappings, bypasses, client-supplied identity derivation, HTTP plumbing, or architectural violations were introduced.",
-    "reviewed_at": "2026-09-10T15:25:06Z",
+    "summary": "The resolver satisfies AUTH-005-B and D-018: it uses only trusted userId lookup, classifies strictly by the exact stored role, preserves both IDs independently, emits empty scopes, uses one safe authentication failure for missing/invalid mappings, and is registered/exported within the allowed path. Build and Prisma validation passed.",
+    "reviewed_at": "2026-09-10T16:07:43Z",
     "provider": "codex"
   },
   "notes": [
@@ -39,7 +40,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 18,
+    "slot": 19,
     "last_provider": "codex",
     "claude_review_every": 0
   }

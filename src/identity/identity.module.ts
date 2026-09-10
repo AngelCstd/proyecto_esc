@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { DatabaseModule } from '../database/database.module';
 import { HUMAN_IDENTITY_VERIFIER } from './human-identity-verifier';
+import { HumanPrincipalResolver } from './human-principal-resolver.service';
 import { PrismaUserInfoRepository } from './prisma-user-info.repository';
 import {
   createSupabaseClient,
@@ -24,6 +25,7 @@ import { UserInfoRepository } from './user-info.repository';
       provide: HUMAN_IDENTITY_VERIFIER,
       useExisting: SupabaseHumanIdentityVerifier,
     },
+    HumanPrincipalResolver,
     PrismaUserInfoRepository,
     {
       provide: UserInfoRepository,
@@ -32,6 +34,7 @@ import { UserInfoRepository } from './user-info.repository';
   ],
   exports: [
     HUMAN_IDENTITY_VERIFIER,
+    HumanPrincipalResolver,
     SupabaseHumanIdentityVerifier,
     UserInfoRepository,
   ],
