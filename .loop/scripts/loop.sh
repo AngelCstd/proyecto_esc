@@ -409,6 +409,47 @@ EOF
   return 0
 }
 
+# True only for pure-documentation paths, which cannot execute anything and may
+# therefore quote a forbidden command as prose (a security policy document
+# naming the commands it forbids is the motivating case).
+#
+# Deliberately a closed list of extensions, not a heuristic: no attempt is made
+# to read intent from surrounding words like "never" or "do not". Anything not
+# on the list - including extensionless files such as Dockerfile, Makefile or a
+# bare README - is NOT documentation for this purpose and stays scanned. The
+# classification fails closed.
+is_documentation_path() {
+  local p="$1"
+  [ -n "$p" ] || return 1
+  local res=1
+  shopt -s nocasematch
+  case "$p" in
+    *.md|*.txt) res=0 ;;
+  esac
+  shopt -u nocasematch
+  return $res
+}
+
+# Emits every line of the patch EXCEPT the sections belonging to pure
+# documentation files. Text before the first 'diff --git' header (the harness's
+# own preamble) is emitted, and any header whose destination path cannot be
+# parsed confidently leaves the section scanned.
+emit_scannable_patch_sections() {
+  local patch_file="$1" line target skip=0
+  while IFS= read -r line; do
+    case "$line" in
+      'diff --git '*)
+        target="${line#diff --git }"
+        target="${target#* b/}"
+        if is_documentation_path "$target"; then skip=1; else skip=0; fi
+        ;;
+    esac
+    if [ "$skip" -eq 0 ]; then
+      printf '%s\n' "$line"
+    fi
+  done < "$patch_file"
+}
+
 assert_no_forbidden_database_commands() {
   local patch_file="$1"
   GUARD_ERROR=""
@@ -423,7 +464,7 @@ assert_no_forbidden_database_commands() {
   )
   local pattern
   for pattern in "${patterns[@]}"; do
-    if grep -qEi "$pattern" "$patch_file"; then
+    if emit_scannable_patch_sections "$patch_file" | grep -qEi "$pattern"; then
       GUARD_ERROR="Forbidden/destructive database command or user_info DDL found in diff: $pattern"
       return 1
     fi
