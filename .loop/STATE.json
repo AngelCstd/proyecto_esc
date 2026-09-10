@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 23,
+  "iteration": 24,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -27,14 +27,15 @@
     "AUTH-013-A",
     "AUTH-011-B",
     "AUTH-012-B",
-    "AUTH-014-A"
+    "AUTH-014-A",
+    "AUTH-015-A"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-014-A",
+    "task_id": "AUTH-015-A",
     "verdict": "approve",
-    "summary": "The change meets AUTH-014-A and complies with the architecture. API-key-shaped Bearer credentials are routed deterministically, the guard trusts only the authentication service’s Principal, expected credential failures receive a generic 401, unexpected infrastructure errors propagate, and HumanAuthGuard rejects API-key prefixes before Supabase verification. Changes stay within allowed paths. The complete diff was reviewed; build and Prisma validation passed.",
-    "reviewed_at": "2026-09-10T17:12:18Z",
+    "summary": "The change satisfies AUTH-015-A. It globally registers allowlist-based completion logging, strips query parameters from the pathname, logs only the permitted metadata fields, preserves request/response behavior, stays within allowed paths, and passes deterministic build and Prisma validation checks.",
+    "reviewed_at": "2026-09-10T17:23:58Z",
     "provider": "codex"
   },
   "notes": [
@@ -44,7 +45,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 23,
+    "slot": 24,
     "last_provider": "codex",
     "claude_review_every": 0
   }
