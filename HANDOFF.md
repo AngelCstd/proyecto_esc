@@ -1,8 +1,11 @@
 # HANDOFF — Noktos Auth Engineering Loop
 
 **Para:** la próxima sesión de Claude Code que actúe como Supervisor/Orchestrator de este repositorio.
-**Escrito:** 2026-09-08, al pausar voluntariamente una sesión sana (el humano se retiraba, no un bloqueo).
+**Escrito:** 2026-09-10, al cerrar una sesión sana (el humano pidió subir todo y dejar todo listo).
 **Estado del loop:** PAUSADO limpio. Sin HUMAN_GATE, sin BLOCKED, worktree limpio, nada pendiente de decisión.
+
+> **Para arrancar rápido sin leer todo esto primero:** usa `NEXT_SESSION_PROMPT.md` — es el
+> mensaje literal para pegar al abrir una sesión nueva. Este archivo es el detalle de respaldo.
 
 ---
 
@@ -19,9 +22,10 @@ acción, sigue el protocolo de arranque de `CLAUDE.md`: lee `.loop/GOAL.md`,
 `.loop/ARCHITECTURE_DECISIONS.md`, `.loop/CONTRACTS.md`, `.loop/PRISMA_SAFETY.md`,
 `.loop/STATE.json`, luego `git status` y comprueba si existe `.loop/HUMAN_GATE.md`.
 
-Esta sesión ocurrió íntegramente en **Windows** (no macOS, a diferencia del handoff anterior).
-Revalida versiones (`codex --version`, `node --version`, `jq --version`) si esta continuación
-ocurre en otra máquina.
+Esta sesión (y la anterior) ocurrieron íntegramente en **Windows**. El humano mencionó en algún
+momento que pensaba continuar desde su Mac — no llegó a pasar en esta sesión, pero puede pasar
+en la próxima. Revalida versiones (`codex --version`, `node --version`, `jq --version`) y no
+asumas que el entorno es el mismo si cambia de máquina — ver §3.1.
 
 ---
 
@@ -34,55 +38,52 @@ Reviewer, no corriges a mano un diff rechazado, no debilitas guards.
 
 ---
 
-## 2. Prompt sugerido para arrancar la próxima sesión
-
-Copia y pega esto tal cual al abrir una sesión nueva:
-
-```
-Lee HANDOFF.md completo, luego el protocolo de arranque de CLAUDE.md
-(.loop/GOAL.md, .loop/ARCHITECTURE_DECISIONS.md, .loop/CONTRACTS.md,
-.loop/PRISMA_SAFETY.md, .loop/STATE.json, git status, y si existe
-.loop/HUMAN_GATE.md). Dame un resumen de en qué quedamos y pregúntame
-si quieres que retome el loop en modo autónomo (batches encadenados
-sin pedirme aprobación entre cada uno, deteniéndote solo ante las
-condiciones reales de CLAUDE.md) o si prefieres ir paso a paso.
-```
-
-La autorización de batches encadenados sin preguntar que usé en esta sesión fue
-**de esta conversación, no está escrita en CLAUDE.md** — por diseño del propio `CLAUDE.md`
-("una aprobación no aplica a todos los contextos futuros"), la próxima sesión debe
-**volver a pedirla explícitamente**, no asumirla del historial.
-
----
-
-## 3. Estado del repositorio
+## 2. Estado del repositorio
 
 | | |
 | --- | --- |
 | Rama | `loop/noktos-auth` |
-| HEAD | `8be3427` — `loop(AUTH-009-A): Define API credential and scope Prisma models` |
+| HEAD local | `b6a46dd` — `loop(AUTH-010-A): Implement API key generation and hashing primitive` |
 | Worktree | limpio |
 | `.loop/HUMAN_GATE.md` | no existe |
-| `.loop/MAX_ITERATIONS_REACHED.md` | existe (recibo informativo del último batch sano, no es un gate) |
-| Remote | `origin` → `https://github.com/AngelCstd/proyecto_esc.git` — **rama 14 commits por delante, sin push hecho** |
-| Artefacto suelto | `.loop/runs/20260908-152040-003/` solo tiene `architect.prompt.txt` — quedó a medias porque interrumpí el batch ahí a propósito (ver §5). Es git-ignored, inofensivo, no hace falta limpiarlo; el próximo `loop.sh` crea su propio directorio nuevo. |
+| Remote | `origin` → `https://github.com/AngelCstd/proyecto_esc.git` — **con push hecho** (ver nota abajo) |
 
-`.loop/STATE.json`: `status=RUNNING`, `iteration=13`, `blocked_tasks=[]`, `last_review` de
-`AUTH-009-A` en `approve`.
+**Nota sobre el push:** esta sesión terminó con `origin/loop/noktos-auth` ya sincronizado hasta
+`a9b46fe` por una vía externa a esta conversación (no fue esta sesión de Claude) — no se investigó
+quién/qué lo hizo, solo se constató el hecho vía `git fetch`. Después de esto se pusheó el resto
+(`b6a46dd` en adelante, incluyendo el commit de este mismo handoff). **Verifica con
+`git fetch && git status -sb`** al arrancar para confirmar que tu copia local coincide con
+`origin/loop/noktos-auth` antes de asumir nada sobre qué está publicado.
 
-Versiones usadas esta sesión: `codex-cli 0.153.0`, `node v22.15.0`, `npm 10.9.2`, `jq 1.8.2`
-(instalado vía `winget`, ver §5.1 — importante si cambia de máquina).
+`.loop/STATE.json`: `status=RUNNING`, `iteration=14`, `blocked_tasks=[]`, `last_review` de
+`AUTH-010-A` en `approve`.
+
+Versiones usadas esta sesión (Windows): `codex-cli 0.153.0`, `node v22.15.0`, `npm 10.9.2`,
+`jq 1.8.2` vía `winget`. **Revalida las tuyas si cambia la máquina.**
 
 Config del harness sin cambios: `CLAUDE_REVIEW_EVERY=0`, `REVIEWER_MODE=rotate`,
 `ARCHITECT_PROVIDER=codex`, `MAX_ATTEMPTS_PER_TASK=2`. Architect, Implementer y Reviewer
 siguen siendo Codex exclusivamente. Claude CLI no está instalado y no hace falta.
 
+### 3.1 Si cambias de máquina (p. ej. a Mac)
+
+```bash
+cd <ruta-del-repo>
+git status                        # si hay algo sucio, para y revísalo primero
+git fetch origin
+git log --oneline -1 origin/loop/noktos-auth   # compara contra el HEAD de arriba
+git checkout loop/noktos-auth
+git merge --ff-only origin/loop/noktos-auth    # debe ser fast-forward; si no, algo diverge - para
+npm install                       # node_modules/ no viaja con git
+```
+
+`.loop/runs/` de sesiones anteriores y `.env` tampoco viajan — no los busques, es normal.
+
 ---
 
-## 4. Qué se logró en esta sesión
+## 3. Qué se logró en total (14 tareas aprobadas)
 
-13 tareas completadas y aprobadas de forma independiente (arrancando desde 2, quedaron 11
-nuevas). En términos de negocio, no de tickets:
+En términos de negocio, no de tickets:
 
 - Servicio NestJS base, compilando.
 - Configuración validada al arrancar (puerto, entorno).
@@ -96,8 +97,12 @@ nuevas). En términos de negocio, no de tickets:
 - Mapeo sanitizado de errores de Core → Auth (sin filtrar detalles internos).
 - Modelos Prisma de `ApiCredential`/`ApiCredentialScope` en `noktos_auth` (test/live,
   hash-only, revocación, sin migración real ejecutada).
+- **Nuevo:** servicio de generación de API keys (`nok_test_`/`nok_live_`, 256 bits de entropía,
+  hash SHA-256 determinístico para persistencia futura, sin guardar la key en texto plano, sin
+  estado). Es solo la pieza de generación — todavía no hay persistencia, endpoints ni
+  autenticación real por key.
 
-Detalle técnico completo: `git log --oneline` desde `caacda2` hasta `8be3427`.
+Detalle técnico completo: `git log --oneline` desde `caacda2` hasta `b6a46dd`.
 
 Todas pasaron por el flujo completo: Architect → Implementer (Codex, sandbox workspace-write)
 → guards de scope/DB → `npm run build` + `prisma validate` → Reviewer independiente → commit.
@@ -105,73 +110,75 @@ Ninguna se aprobó ni se commiteó a mano.
 
 ---
 
-## 5. Incidentes de esta sesión y qué se corrigió
+## 4. Incidentes de esta sesión y qué se corrigió
 
-### 5.1 Bug de `jq` con CRLF en Windows (RESUELTO, harness corregido)
+### 4.1 Bug de `jq` con CRLF en Windows (RESUELTO, harness corregido)
 
 El `jq` instalado vía `winget` (build nativo de Windows, `jqlang.jq`) emite `\r\n` en su salida
 incluso con `-r`. Nada en `loop.sh` recortaba ese `\r`, y eso rompía silenciosamente el matching
 de `allowed_paths`/`forbidden_paths` — produjo un `exit 6` falso ("Task scope violation") sobre
-un diff de `AUTH-001-B` que en realidad era válido y estaba perfectamente dentro de scope.
+un diff de `AUTH-001-B` que en realidad era válido.
 
-Fix aplicado y commiteado (`b93c191 fix: normalize jq output across platforms`): un helper
-único `jq_run()` en `loop.sh` por el que pasa **toda** invocación a `jq` — usa `-b/--binary`
-cuando está disponible y además recorta un `\r` final por línea como respaldo, preservando el
-exit code real de `jq` (no el de `sed`) vía `PIPESTATUS`, igual que ya hacía `verify.sh`.
-Validado con una suite de regresión de 24 checks sin invocar modelos, incluyendo una repetición
-exacta del caso real que había fallado. **No fue necesario instalar un jq distinto ni depender
-de configuración especial del sistema.**
+Fix commiteado (`b93c191 fix: normalize jq output across platforms`): un helper único
+`jq_run()` en `loop.sh` por el que pasa **toda** invocación a `jq` — usa `-b/--binary` cuando
+está disponible y recorta un `\r` final por línea como respaldo, preservando el exit code real
+de `jq` vía `PIPESTATUS`. Validado con 24 checks de regresión sin invocar modelos.
 
-Corrección a un análisis previo mío: pensé inicialmente que esto también rompía el veredicto del
-Reviewer (`$(jq -r '.verdict...')`), pero en este bash de MSYS la sustitución de comandos
-`$(...)` ya recortaba el `\r` por su cuenta — solo la sustitución de procesos (`<(...)`, usada en
-`read_lines_into_reply`) y los pipes/redirects directos lo preservaban. El fix cubre ambos casos
-igual, pero quiero que quede clara la imprecisión de mi reporte original.
+Nota de precisión: en este bash de MSYS, la sustitución de comandos `$(...)` ya recortaba el
+`\r` por su cuenta; solo la sustitución de procesos (`<(...)`) y los pipes/redirects directos lo
+preservaban. El fix cubre ambos casos igual.
 
-### 5.2 `core.autocrlf=true` dejaba los `.sh` del harness en CRLF (RESUELTO)
+En Mac (jq de Homebrew) este bug simplemente no existe — el fix es inofensivo ahí, no hace
+falta revertirlo.
 
-Mismo tipo de riesgo que 5.1 pero a nivel de los propios scripts, no de `jq`. Fix
-(`7a4ec5c fix: enforce portable script line endings`): `.gitattributes` en la raíz con
-`*.sh text eol=lf` y `*.ps1 text eol=crlf`, `.gitattributes` añadido a `PROTECTED_PATHS` en
-`loop.sh`, documentado en `README_LOOP.md`. Renormalización **solo** de los 5 scripts afectados,
-no del repo completo. `core.autocrlf` del usuario **no se tocó**.
+### 4.2 `core.autocrlf=true` dejaba los `.sh` del harness en CRLF (RESUELTO)
 
-### 5.3 El Implementer no tiene red (SIN RESOLVER DE FONDO — mitigado dos veces, no arreglado)
+Mismo tipo de riesgo que 4.1 pero en los propios scripts. Fix
+(`7a4ec5c fix: enforce portable script line endings`): `.gitattributes` en la raíz
+(`*.sh text eol=lf`, `*.ps1 text eol=crlf`), añadido a `PROTECTED_PATHS`, documentado en
+`README_LOOP.md`. `core.autocrlf` del usuario no se tocó.
 
-Ya documentado en la versión anterior de este handoff: el sandbox `workspace-write` de Codex no
-tiene acceso a red, así que cualquier tarea que necesite instalar una dependencia nueva se
-bloquea. Pasó dos veces esta sesión:
+### 4.3 El Implementer no tiene red (SIN RESOLVER DE FONDO — mitigado tres veces)
 
-1. **Prisma inicial** (`AUTH-002`): resuelto con el humano corriendo
-   `npm install prisma @prisma/client` manualmente y commiteando `package.json`/`lock`
-   (`6419786`), dejando que el loop trabajara offline desde ahí.
-2. **`@prisma/adapter-pg`** (`AUTH-004-A`): el Implementer devolvió `blocked` correctamente
-   (no buscó la dependencia en otro lado del disco — comportamiento correcto). Recuperación
-   autorizada explícitamente por el humano: `npm install --ignore-scripts` desde el host para
-   precargar `node_modules`/cache, descarte completo del diff no aprobado, borrado puntual de
-   ese `HUMAN_GATE.md`, y reintento con una sesión fresca de Codex que sí pasó completo.
+El sandbox `workspace-write` de Codex no tiene acceso a red; cualquier tarea que necesite una
+dependencia nueva se bloquea. Pasó dos veces con dependencias reales (Prisma y
+`@prisma/adapter-pg`), resuelto ambas veces con el humano corriendo `npm install` desde el host
+y commiteando, dejando que el loop trabajara offline desde ahí. La investigación de fondo
+(permission profiles de Codex con allowlist de red) sigue sin retomarse — ver §6.
 
-**Esto va a volver a pasar** en cualquier tarea futura que necesite una dependencia nueva no
-instalada todavía. La investigación de fondo (permission profiles de Codex con allowlist de red
-+ aislamiento de lectura de disco, la decisión "B+C" que quedaba pendiente en el handoff
-anterior) **no se retomó esta sesión** — quedó aparcada porque cada bloqueo puntual se resolvió
-más rápido con la instalación manual. Si esto se vuelve frecuente, vale la pena retomar esa
-investigación en vez de seguir parcheando caso por caso. Dato nuevo de esta sesión: en
-`codex-cli 0.153.0` en Windows, `codex sandbox` (el mecanismo de permission profiles) falla
-directamente con `CreateProcessAsUserW... Windows error 5 (Acceso denegado)` para una cuenta no
-Administradora — un fallo distinto y más temprano que el `SIGABRT` de macOS 0.150.1 documentado
-antes. `codex doctor` reporta `sandbox backend: elevated` de todos modos, lo cual no se
-reconcilió; sigue siendo una pregunta abierta si el `codex exec` real (el que usa el Implementer)
-necesita o no que la sesión que lo invoca esté elevada.
+### 4.4 `TaskStop` no mata el árbol de procesos completo en Windows (NUEVO, sin arreglar — cuidado operativo, no del harness)
+
+Al intentar pausar un batch a mitad de camino con la herramienta `TaskStop` del propio Claude
+Code, el proceso wrapper de `loop.sh` pareció detenerse, pero **un hijo de Codex siguió vivo y
+terminó una implementación completa (`AUTH-010-A`) sin supervisión del harness** — escribió
+archivos en el working tree pero nunca pasó por guards/verify/reviewer porque el wrapper que
+haría esas llamadas ya estaba "muerto" desde la perspectiva de la herramienta.
+
+Encima, mientras ese proceso zombie seguía vivo, el propio Supervisor (yo) hizo un commit normal
+y no relacionado (`a9b46fe`, este mismo handoff). Cuando el zombie finalmente reaccionó, comparó
+el HEAD actual contra su referencia vieja, vio que había cambiado, y concluyó incorrectamente
+**"el Implementer creó un commit, prohibido"** — escribió un `HUMAN_GATE.md` real pero con
+diagnóstico falso. Se verificó con `git reflog` y `git fsck --unreachable` que **nunca existió
+tal commit** — el historial estaba limpio. Se descartó el diff huérfano (nunca revisado, código
+de manejo de secretos) y se corrigió el gate.
+
+Después, ese mismo run (relanzado limpio) quedó **~40 horas suspendido** porque la laptop se fue
+a dormir con el proceso corriendo — al despertar la máquina, el proceso retomó exactamente donde
+iba y terminó normal (`AUTH-010-A` aprobado y commiteado como `b6a46dd`).
+
+**Lección operativa, no un bug del harness:** si vas a pausar un batch en Windows, no confíes en
+que `TaskStop` mate todo el árbol de procesos. Antes de hacer cualquier commit propio mientras
+un batch podría seguir vivo en segundo plano, confirma con `Get-Process` (PowerShell, no `ps aux`
+de Git Bash — no ve todos los procesos de Windows) que de verdad no queda nada corriendo.
 
 ---
 
-## 6. Qué falta
+## 5. Qué falta
 
 Backlog restante (`AUTH-010` en adelante en `.loop/BACKLOG.yaml`), agrupado:
 
-- **API Keys**: generación (`nok_test_`/`nok_live_`), revocación, autenticación por key,
-  scopes/permisos de la key.
+- **API Keys**: ya existe la generación (`AUTH-010-A`); falta persistencia (crear/listar/
+  revocar), autenticación real por key, y scopes/permisos de la key.
 - **Acceso humano autenticado**: conectar la verificación de Supabase ya lista con guards/
   contexto reales de la API.
 - **Partner API**: ingreso para integraciones externas vía API Key.
@@ -182,42 +189,42 @@ Backlog restante (`AUTH-010` en adelante en `.loop/BACKLOG.yaml`), agrupado:
   mismo camino de identidad (sin construir el servidor MCP ni el flujo OAuth específico).
 - **Cierre**: Swagger/documentación pública, checklist final de `READY_FOR_HUMAN_REVIEW`.
 
-Próxima tarea esperable si se retoma el loop: algo bajo `AUTH-010` (generación/lifecycle de API
-keys), ya que `AUTH-009` (el modelo de datos) quedó aprobado.
+Próxima tarea esperable si se retoma el loop: la siguiente porción de `AUTH-010` (persistencia
+de credenciales, usando los modelos Prisma de `AUTH-009-A`).
 
 ---
 
-## 7. Decisiones arquitectónicas abiertas (sin cambios esta sesión)
+## 6. Decisiones arquitectónicas abiertas (sin cambios esta sesión)
 
 En `.loop/ARCHITECTURE_DECISIONS.md`, sección `OPEN`. Ninguna bloquea el trabajo actual:
 
-- **Q-001** — matriz exacta de permisos por rol humano (`administrador`, `reservan`, `viajero`).
-  Relevante desde `AUTH-012`.
+- **Q-001** — matriz exacta de permisos por rol humano. Relevante desde `AUTH-012`.
 - **Q-002** — OAuth específico MCP/ChatGPT. Relevante en `AUTH-017`.
-- **Q-003** — assertion interna Auth→Core futura (JWT firmado). Relevante más allá de `AUTH-007`
-  (que ya usa el `NoopCoreRequestAuthStrategy` como estaba previsto).
+- **Q-003** — assertion interna Auth→Core futura (JWT firmado). Relevante más allá de `AUTH-007`.
 
 Una decisión ausente se escala, nunca se inventa.
 
 ---
 
-## 8. Cosas a mejorar / vigilar (no urgentes)
+## 7. Cosas a mejorar / vigilar (no urgentes)
 
-- **§5.3**: si los bloqueos de red por dependencias nuevas se vuelven frecuentes, retomar la
+- **§4.3**: si los bloqueos de red por dependencias nuevas se vuelven frecuentes, retomar la
   investigación de permission profiles de Codex en Windows en vez de seguir con instalación
-  manual caso por caso.
+  manual caso por caso. Dato de la sesión anterior: `codex sandbox` en Windows falla con
+  `CreateProcessAsUserW... Windows error 5` para cuentas no Administradoras — mecanismo
+  completamente distinto al `SIGABRT` de macOS 0.150.1 documentado en un handoff más viejo (no
+  mezclar ambos hallazgos si se retoma en otra máquina).
+- **§4.4**: evitar pausar batches a medias con `TaskStop` en Windows si se puede evitar; si hay
+  que hacerlo, verificar con `Get-Process` que no quede nada vivo antes de hacer cualquier otro
+  commit.
 - Los `.ps1` en `.loop/scripts/` (harness V2, sin usar desde el port a `.sh`) siguen sin
-  borrarse — pendiente desde el handoff anterior, sigue sin ser urgente.
-- Fricción menor observada: cuando Codex ejecuta comandos propios vía PowerShell (no vía esta
-  sesión de Claude), a veces `git`/`rg` no están en el PATH de esa PowerShell y falla con
-  "comando no reconocido". No ha bloqueado ninguna tarea (el agente se recupera leyendo archivos
-  directo), pero podría eventualmente.
-- Nunca se ha hecho `git push`. Cuando se decida compartir el trabajo, alguien tiene que
-  autorizarlo explícitamente.
+  borrarse — pendiente desde hace dos handoffs, sigue sin ser urgente.
+- Fricción menor: cuando Codex ejecuta comandos propios vía PowerShell, a veces `git`/`rg` no
+  están en ese PATH y falla con "comando no reconocido". No ha bloqueado ninguna tarea.
 
 ---
 
-## 9. Cuándo detenerte y devolver el control
+## 8. Cuándo detenerte y devolver el control
 
 Sin cambios respecto al contrato de `CLAUDE.md`: HUMAN_GATE real, BLOCKED, guard failure, scope
 violation, intento de modificar rutas protegidas, decisión arquitectónica OPEN necesaria,
@@ -226,11 +233,15 @@ push/deploy/release, trabajo de Core o MCP, dos intentos fallidos de la misma ta
 inconsistencia entre Git/STATE.json/artefactos, comportamiento inesperado del harness, o
 `COMPLETE`/`READY_FOR_HUMAN_REVIEW`.
 
+La autorización para encadenar batches sin pedir aprobación **no está escrita en `CLAUDE.md`** —
+es de conversación, no dura entre sesiones. La próxima sesión debe pedirla de nuevo explícitamente
+antes de operar así (ver `NEXT_SESSION_PROMPT.md`).
+
 ---
 
-## 10. Resumen en una línea
+## 9. Resumen en una línea
 
-El loop funciona bien en Windows tras corregir dos bugs de line-endings (`jq` y los propios
-scripts); lleva 13 tareas aprobadas hasta `AUTH-009-A` (modelo de datos de API Keys) y se
-detuvo limpio, sin gate, solo porque el humano se iba — el pendiente real de fondo sigue siendo
-que el Implementer no tiene red, mitigado dos veces a mano pero no resuelto de raíz.
+14 tareas aprobadas hasta `AUTH-010-A` (generación de API keys); dos bugs de line-endings
+corregidos de raíz (`jq` y los scripts); el pendiente real de fondo sigue siendo que el
+Implementer no tiene red (mitigado tres veces a mano); y esta sesión dejó una lección operativa
+concreta sobre no confiar en `TaskStop` para matar procesos de Windows a medias.
