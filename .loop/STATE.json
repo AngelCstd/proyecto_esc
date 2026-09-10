@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 14,
+  "iteration": 15,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -18,14 +18,15 @@
     "AUTH-007-B",
     "AUTH-008-A",
     "AUTH-009-A",
-    "AUTH-010-A"
+    "AUTH-010-A",
+    "AUTH-010-B"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-010-A",
+    "task_id": "AUTH-010-B",
     "verdict": "approve",
-    "summary": "AUTH-010-A meets the task and architecture requirements. It generates 256-bit secrets with Node cryptography, uses exact test/live prefixes, hashes the complete raw key with SHA-256, returns only truncated display metadata alongside the one-time raw result, remains stateless, and introduces no persistence, logging, networking, or out-of-scope changes. The deterministic build and Prisma validation passed.",
-    "reviewed_at": "2026-09-10T14:24:10Z",
+    "summary": "The repository contracts and Prisma implementation satisfy AUTH-010-B. Credential creation and scopes use one atomic nested write; only hash and display prefix are accepted for persistence; safe listings exclude hashes and raw key material; hash lookup derives the single agent identity from the credential; and revocation conditionally transitions only active records while preserving ownership and scopes. Changes stay within allowed paths, the diff is complete, and both TypeScript build and Prisma validation passed.",
+    "reviewed_at": "2026-09-10T14:51:41Z",
     "provider": "codex"
   },
   "notes": [
@@ -35,7 +36,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 14,
+    "slot": 15,
     "last_provider": "codex",
     "claude_review_every": 0
   }
