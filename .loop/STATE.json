@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 22,
+  "iteration": 23,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -26,14 +26,15 @@
     "AUTH-005-B",
     "AUTH-013-A",
     "AUTH-011-B",
-    "AUTH-012-B"
+    "AUTH-012-B",
+    "AUTH-014-A"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-012-B",
+    "task_id": "AUTH-014-A",
     "verdict": "approve",
-    "summary": "The opt-in NestJS scope authorization adapter meets AUTH-012-B. It passes handler-declared scopes unchanged to the existing exact-match evaluator, relies only on the trusted request Principal, returns safe generic 401/403 envelopes, is exported through a focused non-global AuthorizationModule, stays within src/authorization/, and passes deterministic build and Prisma validation.",
-    "reviewed_at": "2026-09-10T16:42:00Z",
+    "summary": "The change meets AUTH-014-A and complies with the architecture. API-key-shaped Bearer credentials are routed deterministically, the guard trusts only the authentication service’s Principal, expected credential failures receive a generic 401, unexpected infrastructure errors propagate, and HumanAuthGuard rejects API-key prefixes before Supabase verification. Changes stay within allowed paths. The complete diff was reviewed; build and Prisma validation passed.",
+    "reviewed_at": "2026-09-10T17:12:18Z",
     "provider": "codex"
   },
   "notes": [
@@ -43,7 +44,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 22,
+    "slot": 23,
     "last_provider": "codex",
     "claude_review_every": 0
   }

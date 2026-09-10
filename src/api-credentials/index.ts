@@ -8,6 +8,7 @@ export type {
   AuthenticateApiKeyResult,
 } from './api-key-authentication.contracts';
 export { ApiKeyAuthenticationError } from './api-key-authentication.contracts';
+export { ApiKeyAuthGuard } from './api-key-auth.guard';
 export { ApiKeyAuthenticationService } from './api-key-authentication.service';
 export type {
   ApiCredentialAuthenticationRecord,
