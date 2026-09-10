@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 27,
+  "iteration": 28,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -31,14 +31,15 @@
     "AUTH-015-A",
     "AUTH-016-A",
     "AUTH-017-A",
-    "AUTH-018-A"
+    "AUTH-018-A",
+    "AUTH-020-A"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-018-A",
+    "task_id": "AUTH-020-A",
     "verdict": "approve",
-    "summary": "The documentation-only change satisfies AUTH-018-A and matches the authoritative architecture and current implementation. It accurately covers credential dispatch, Principal semantics, safe Core error mapping, request IDs, the centralized outbound Core path, validated environment variables, external Core/MCP boundaries, and deferred decisions without inventing endpoints, permissions, protocols, cryptography, or secrets. The diff is not truncated, contains only docs/integration-contracts.md, and deterministic build and Prisma validation both passed.",
-    "reviewed_at": "2026-09-10T18:49:23Z",
+    "summary": "The change is confined to the allowed middleware and meets the task requirements. It excludes query strings, decodes percent-encoded path content before redacting API-key and compact-JWT shapes, fails closed on malformed URLs, preserves safe metadata, remains stateless, and introduces no dependencies or architecture violations. Deterministic TypeScript build and Prisma validation passed.",
+    "reviewed_at": "2026-09-10T20:23:16Z",
     "provider": "codex"
   },
   "notes": [
@@ -48,7 +49,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 28,
+    "slot": 30,
     "last_provider": "codex",
     "claude_review_every": 0
   }

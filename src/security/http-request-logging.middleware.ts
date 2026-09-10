@@ -3,6 +3,13 @@ import { IncomingMessage, ServerResponse } from 'node:http';
 
 type NextFunction = () => void;
 
+const REDACTED_CREDENTIAL = '[REDACTED_CREDENTIAL]';
+const INVALID_PATHNAME = '[INVALID_PATHNAME]';
+const API_KEY_PATTERN = /nok_(?:test|live)_[A-Za-z0-9_-]+/g;
+const COMPACT_JWT_PATTERN =
+  /[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g;
+const URL_BASE = 'http://localhost';
+
 @Injectable()
 export class HttpRequestLoggingMiddleware implements NestMiddleware {
   private readonly logger = new Logger(HttpRequestLoggingMiddleware.name);
@@ -32,12 +39,19 @@ export class HttpRequestLoggingMiddleware implements NestMiddleware {
   }
 
   private getPathname(url: string | undefined): string {
-    const separatorIndex = url?.indexOf('?') ?? -1;
-
     if (!url) {
       return '/';
     }
 
-    return separatorIndex >= 0 ? url.slice(0, separatorIndex) : url;
+    try {
+      const encodedPathname = new URL(url, URL_BASE).pathname;
+      const pathname = decodeURIComponent(encodedPathname);
+
+      return pathname
+        .replace(API_KEY_PATTERN, REDACTED_CREDENTIAL)
+        .replace(COMPACT_JWT_PATTERN, REDACTED_CREDENTIAL);
+    } catch {
+      return INVALID_PATHNAME;
+    }
   }
 }
