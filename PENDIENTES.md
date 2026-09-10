@@ -3,7 +3,11 @@
 Cosas conscientemente **diferidas**, no olvidadas. Cada una dice por qué se difirió y qué hace
 falta para retomarla.
 
-Última actualización: 2026-09-10.
+Última actualización: 2026-09-10, al cerrar el loop en `READY_FOR_HUMAN_REVIEW`.
+
+> **Contexto:** el backlog se completó (29 tareas aprobadas). Lo de abajo es lo que
+> deliberadamente **no** se hizo, más lo que un humano debe verificar. El checklist de revisión
+> está en `docs/human-review-checklist.md`.
 
 ---
 
