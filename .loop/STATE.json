@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 16,
+  "iteration": 17,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -20,14 +20,15 @@
     "AUTH-009-A",
     "AUTH-010-A",
     "AUTH-010-B",
-    "AUTH-010-C"
+    "AUTH-010-C",
+    "AUTH-011-A"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-010-C",
+    "task_id": "AUTH-011-A",
     "verdict": "approve",
-    "summary": "AUTH-010-C meets the task requirements and architecture constraints. The injectable stateless lifecycle service composes the existing generator and repository, returns raw key material only after successful persistence, exposes only safe metadata for create/list, delegates active-only revocation, stays within allowed paths, and passes TypeScript build and Prisma validation.",
-    "reviewed_at": "2026-09-10T15:00:35Z",
+    "summary": "AUTH-011-A meets the acceptance criteria and architecture constraints. API keys are strictly parsed, hashed using the existing SHA-256 convention, resolved without persisting or returning secrets, checked for environment/status/revocation/expiration, and conditionally marked used before an agent-bound Principal is returned. The persisted credential exclusively supplies credentialId, agentId, and scopes. Changes are confined to src/api-credentials/, and deterministic build and Prisma validation passed.",
+    "reviewed_at": "2026-09-10T15:14:53Z",
     "provider": "codex"
   },
   "notes": [
@@ -37,7 +38,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 16,
+    "slot": 17,
     "last_provider": "codex",
     "claude_review_every": 0
   }

@@ -127,6 +127,23 @@ export class PrismaApiCredentialRepository extends ApiCredentialRepository {
     return result.count === 1;
   }
 
+  async markUsedIfUsable(
+    credentialId: string,
+    usedAt: Date,
+  ): Promise<boolean> {
+    const result = await this.prisma.apiCredential.updateMany({
+      where: {
+        id: credentialId,
+        status: 'active',
+        revokedAt: null,
+        OR: [{ expiresAt: null }, { expiresAt: { gt: usedAt } }],
+      },
+      data: { lastUsedAt: usedAt },
+    });
+
+    return result.count === 1;
+  }
+
   private toSafeRecord(
     credential: SafeCredentialQueryResult,
   ): SafeApiCredentialRecord {

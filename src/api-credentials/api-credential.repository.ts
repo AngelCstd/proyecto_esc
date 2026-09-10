@@ -51,5 +51,10 @@ export abstract class ApiCredentialRepository {
     keyHash: string,
   ): Promise<ApiCredentialAuthenticationRecord | null>;
 
+  abstract markUsedIfUsable(
+    credentialId: string,
+    usedAt: Date,
+  ): Promise<boolean>;
+
   abstract revokeActive(credentialId: string): Promise<boolean>;
 }

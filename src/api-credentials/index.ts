@@ -4,6 +4,12 @@ export type {
 } from './api-key-generation.contracts';
 export { ApiKeyGenerationService } from './api-key-generation.service';
 export type {
+  AuthenticateApiKeyInput,
+  AuthenticateApiKeyResult,
+} from './api-key-authentication.contracts';
+export { ApiKeyAuthenticationError } from './api-key-authentication.contracts';
+export { ApiKeyAuthenticationService } from './api-key-authentication.service';
+export type {
   ApiCredentialAuthenticationRecord,
   ApiCredentialStatus,
   CreateApiCredentialRecord,
