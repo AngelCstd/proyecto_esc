@@ -26,3 +26,4 @@ export type {
 } from './api-credential-lifecycle.contracts';
 export { ApiCredentialLifecycleService } from './api-credential-lifecycle.service';
 export { PrismaApiCredentialRepository } from './prisma-api-credential.repository';
+export { ApiCredentialsModule } from './api-credentials.module';

@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 20,
+  "iteration": 21,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -24,14 +24,15 @@
     "AUTH-011-A",
     "AUTH-012-A",
     "AUTH-005-B",
-    "AUTH-013-A"
+    "AUTH-013-A",
+    "AUTH-011-B"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-013-A",
+    "task_id": "AUTH-011-B",
     "verdict": "approve",
-    "summary": "The change meets AUTH-013-A’s acceptance criteria and complies with the architecture. The guard safely parses a single Bearer token, invokes the trusted verifier and resolver in sequence, attaches the unchanged Principal to the shared typed request property, and is exported as an opt-in provider. The decorator reads that same property. Changes are confined to src/identity/, and deterministic build and Prisma validation both passed.",
-    "reviewed_at": "2026-09-10T16:19:18Z",
+    "summary": "The new module correctly imports DatabaseModule, registers one PrismaApiCredentialRepository instance, aliases ApiCredentialRepository to it via useExisting, and exports ApiKeyAuthenticationService without exposing PrismaService. The barrel export and file scope match the task, with no prohibited transport, identity, Core, schema, or policy changes. Build and Prisma validation passed.",
+    "reviewed_at": "2026-09-10T16:27:07Z",
     "provider": "codex"
   },
   "notes": [
@@ -41,7 +42,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 20,
+    "slot": 21,
     "last_provider": "codex",
     "claude_review_every": 0
   }
