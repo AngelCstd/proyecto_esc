@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 25,
+  "iteration": 26,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -29,14 +29,15 @@
     "AUTH-012-B",
     "AUTH-014-A",
     "AUTH-015-A",
-    "AUTH-016-A"
+    "AUTH-016-A",
+    "AUTH-017-A"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-016-A",
+    "task_id": "AUTH-017-A",
     "verdict": "approve",
-    "summary": "The change meets AUTH-016-A’s acceptance criteria and architecture constraints. It adds an append-only creation boundary for sanitized audit events in noktos_auth, exposes no update/delete operations, does not alter public.user_info or wire emitters prematurely, and introduces no secret-bearing or arbitrary payload fields. Deterministic build and Prisma validation both passed.",
-    "reviewed_at": "2026-09-10T18:22:22Z",
+    "summary": "The change meets AUTH-017-A’s acceptance criteria and complies with the architecture. HumanAuthGuard retains HTTP Bearer extraction and request attachment while delegating authentication to the new channel-neutral HumanAuthenticationService. The service deterministically rejects nok_test_/nok_live_ credentials before invoking the human verifier, uses the existing HUMAN_IDENTITY_VERIFIER and HumanPrincipalResolver pipeline, returns the established Principal shape, and is provided/exported by IdentityModule. Changes are confined to src/identity/, introduce no MCP/OAuth/Core/database behavior, and deterministic build and Prisma validation both passed.",
+    "reviewed_at": "2026-09-10T18:36:16Z",
     "provider": "codex"
   },
   "notes": [
@@ -46,7 +47,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 26,
+    "slot": 27,
     "last_provider": "codex",
     "claude_review_every": 0
   }
