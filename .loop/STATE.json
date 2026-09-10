@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 26,
+  "iteration": 27,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -30,14 +30,15 @@
     "AUTH-014-A",
     "AUTH-015-A",
     "AUTH-016-A",
-    "AUTH-017-A"
+    "AUTH-017-A",
+    "AUTH-018-A"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-017-A",
+    "task_id": "AUTH-018-A",
     "verdict": "approve",
-    "summary": "The change meets AUTH-017-A’s acceptance criteria and complies with the architecture. HumanAuthGuard retains HTTP Bearer extraction and request attachment while delegating authentication to the new channel-neutral HumanAuthenticationService. The service deterministically rejects nok_test_/nok_live_ credentials before invoking the human verifier, uses the existing HUMAN_IDENTITY_VERIFIER and HumanPrincipalResolver pipeline, returns the established Principal shape, and is provided/exported by IdentityModule. Changes are confined to src/identity/, introduce no MCP/OAuth/Core/database behavior, and deterministic build and Prisma validation both passed.",
-    "reviewed_at": "2026-09-10T18:36:16Z",
+    "summary": "The documentation-only change satisfies AUTH-018-A and matches the authoritative architecture and current implementation. It accurately covers credential dispatch, Principal semantics, safe Core error mapping, request IDs, the centralized outbound Core path, validated environment variables, external Core/MCP boundaries, and deferred decisions without inventing endpoints, permissions, protocols, cryptography, or secrets. The diff is not truncated, contains only docs/integration-contracts.md, and deterministic build and Prisma validation both passed.",
+    "reviewed_at": "2026-09-10T18:49:23Z",
     "provider": "codex"
   },
   "notes": [
@@ -47,7 +48,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 27,
+    "slot": 28,
     "last_provider": "codex",
     "claude_review_every": 0
   }
