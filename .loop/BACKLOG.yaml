@@ -123,8 +123,14 @@ items:
     risk: low
     depends_on: [AUTH-014, AUTH-017]
 
+  - id: AUTH-020
+    title: Harden request logging against accidental credential exposure in URLs
+    objective: Ensure credential-shaped values cannot reach logs even when they appear accidentally in a request path, query or URL. Raised by an independent reviewer finding on AUTH-019-A - the request logger records the pathname verbatim, so the final handoff could not truthfully claim secret-safe logging. Scope is strictly the existing request-logging boundary. Do not redesign logging, do not add telemetry, routes, guards or any other product functionality, and do not widen the task. If safe redaction would require a logging policy decision that is not already defined in the authoritative documents, return human_gate instead of inventing one.
+    risk: high
+    depends_on: [AUTH-015]
+
   - id: AUTH-019
     title: Final architecture review handoff
-    objective: Review the implementation against GOAL, architecture decisions and Prisma safety policy; produce a human-review checklist and explicitly list deferred items such as internal Auth->Core JWT and final MCP OAuth.
+    objective: Review the implementation against GOAL, architecture decisions and Prisma safety policy; produce a human-review checklist and explicitly list deferred items such as internal Auth->Core JWT and final MCP OAuth. Every status claim must match the code as implemented; do not describe a protection as stronger than what exists.
     risk: high
-    depends_on: [AUTH-015, AUTH-016, AUTH-018]
+    depends_on: [AUTH-015, AUTH-016, AUTH-018, AUTH-020]
