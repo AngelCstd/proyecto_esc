@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 19,
+  "iteration": 20,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -23,14 +23,15 @@
     "AUTH-010-C",
     "AUTH-011-A",
     "AUTH-012-A",
-    "AUTH-005-B"
+    "AUTH-005-B",
+    "AUTH-013-A"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-005-B",
+    "task_id": "AUTH-013-A",
     "verdict": "approve",
-    "summary": "The resolver satisfies AUTH-005-B and D-018: it uses only trusted userId lookup, classifies strictly by the exact stored role, preserves both IDs independently, emits empty scopes, uses one safe authentication failure for missing/invalid mappings, and is registered/exported within the allowed path. Build and Prisma validation passed.",
-    "reviewed_at": "2026-09-10T16:07:43Z",
+    "summary": "The change meets AUTH-013-A’s acceptance criteria and complies with the architecture. The guard safely parses a single Bearer token, invokes the trusted verifier and resolver in sequence, attaches the unchanged Principal to the shared typed request property, and is exported as an opt-in provider. The decorator reads that same property. Changes are confined to src/identity/, and deterministic build and Prisma validation both passed.",
+    "reviewed_at": "2026-09-10T16:19:18Z",
     "provider": "codex"
   },
   "notes": [
@@ -40,7 +41,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 19,
+    "slot": 20,
     "last_provider": "codex",
     "claude_review_every": 0
   }
