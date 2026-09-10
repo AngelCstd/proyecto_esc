@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 15,
+  "iteration": 16,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -19,14 +19,15 @@
     "AUTH-008-A",
     "AUTH-009-A",
     "AUTH-010-A",
-    "AUTH-010-B"
+    "AUTH-010-B",
+    "AUTH-010-C"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-010-B",
+    "task_id": "AUTH-010-C",
     "verdict": "approve",
-    "summary": "The repository contracts and Prisma implementation satisfy AUTH-010-B. Credential creation and scopes use one atomic nested write; only hash and display prefix are accepted for persistence; safe listings exclude hashes and raw key material; hash lookup derives the single agent identity from the credential; and revocation conditionally transitions only active records while preserving ownership and scopes. Changes stay within allowed paths, the diff is complete, and both TypeScript build and Prisma validation passed.",
-    "reviewed_at": "2026-09-10T14:51:41Z",
+    "summary": "AUTH-010-C meets the task requirements and architecture constraints. The injectable stateless lifecycle service composes the existing generator and repository, returns raw key material only after successful persistence, exposes only safe metadata for create/list, delegates active-only revocation, stays within allowed paths, and passes TypeScript build and Prisma validation.",
+    "reviewed_at": "2026-09-10T15:00:35Z",
     "provider": "codex"
   },
   "notes": [
@@ -36,7 +37,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 15,
+    "slot": 16,
     "last_provider": "codex",
     "claude_review_every": 0
   }

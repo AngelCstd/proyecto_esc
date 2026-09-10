@@ -10,4 +10,13 @@ export type {
   SafeApiCredentialRecord,
 } from './api-credential.repository';
 export { ApiCredentialRepository } from './api-credential.repository';
+export type {
+  CreateApiCredentialInput,
+  CreateApiCredentialResult,
+  ListApiCredentialsInput,
+  ListApiCredentialsResult,
+  RevokeApiCredentialInput,
+  RevokeApiCredentialResult,
+} from './api-credential-lifecycle.contracts';
+export { ApiCredentialLifecycleService } from './api-credential-lifecycle.service';
 export { PrismaApiCredentialRepository } from './prisma-api-credential.repository';
