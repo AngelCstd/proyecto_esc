@@ -81,7 +81,7 @@ Columnas conocidas:
 Roles informados literalmente:
 
 - administrador
-- reservan
+- reservante
 - viajero
 
 `id_agente` e `id_viajero` pueden coexistir en la misma fila. No modelarlos como union exclusiva.
@@ -177,11 +177,39 @@ Los checks deterministas baratos (`npm run build`, `prisma validate`) se ejecuta
 
 El loop termina como `READY_FOR_HUMAN_REVIEW`, nunca `PRODUCTION_READY`.
 
+## D-018 - Clasificacion de Principal.type para identidades humanas
+
+Decision humana registrada el 2026-09-10, en respuesta a un HUMAN_GATE del Architect.
+
+`Principal.type` para un usuario humano se deriva EXCLUSIVAMENTE de `public.user_info.rol`,
+nunca de que IDs esten presentes:
+
+- `administrador` -> `agent_user`
+- `reservante` -> `agent_user`
+- `viajero` -> `traveler_user`
+- rol nulo, vacio o no reconocido -> RECHAZAR la autenticacion. No hay tipo por defecto.
+
+`agentId` y `travelerId` se conservan SIEMPRE en el Principal cuando existen en la fila,
+independientemente del tipo resuelto. La clasificacion no borra contexto.
+
+Razon de rechazar en lugar de usar un valor por defecto: una identidad que no se puede
+clasificar con certeza no debe obtener ningun tipo ni permiso implicito.
+
+`administrador` y `reservante` comparten tipo porque ambos actuan a nombre de terceros. La
+diferencia funcional entre ellos (p. ej. `reservante` crea reservas pero no crea viajeros) es
+una diferencia de SCOPES, no de tipo, y queda fuera de esta decision.
+
+Esta decision NO define la matriz rol -> scopes. Q-001 permanece abierta.
+
+Nota factual asociada: el valor real del rol intermedio es `reservante`. Los documentos
+autoritativos decian `reservan` por error hasta esta fecha; se corrigio en D-007, en Q-001 y en
+`GOAL.md` junto con esta decision.
+
 ## OPEN - solo cuando la implementacion llegue a estas piezas
 
 ### Q-001 - Permisos exactos por rol humano
 
-Conocemos roles (`administrador`, `reservan`, `viajero`) pero no su matriz completa de scopes.
+Conocemos roles (`administrador`, `reservante`, `viajero`) pero no su matriz completa de scopes.
 
 El loop puede crear la infraestructura de scopes, pero no inventar permisos definitivos por rol. HUMAN_GATE antes de hardcodear/sembrar una matriz permanente.
 

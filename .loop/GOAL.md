@@ -99,7 +99,7 @@ rol         varchar      nullable
 Valores de `rol` informados actualmente:
 
 - `administrador`
-- `reservan`
+- `reservante`
 - `viajero`
 
 El loop debe tratar esos valores literalmente mientras no exista una decision humana distinta.
