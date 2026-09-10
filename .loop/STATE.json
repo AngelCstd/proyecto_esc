@@ -2,7 +2,7 @@
   "project": "noktos-auth",
   "version": 2,
   "status": "RUNNING",
-  "iteration": 13,
+  "iteration": 14,
   "current_task": null,
   "completed_tasks": [
     "AUTH-000-A",
@@ -17,14 +17,15 @@
     "AUTH-007-A",
     "AUTH-007-B",
     "AUTH-008-A",
-    "AUTH-009-A"
+    "AUTH-009-A",
+    "AUTH-010-A"
   ],
   "blocked_tasks": [],
   "last_review": {
-    "task_id": "AUTH-009-A",
+    "task_id": "AUTH-010-A",
     "verdict": "approve",
-    "summary": "The diff is complete and limited to prisma/schema.prisma. It defines the required noktos_auth API credential and scope models with constrained test/live and active/revoked enums, required agent identity, hash-only secret storage, lifecycle metadata, unique key hashes, duplicate-scope prevention, and cascading scope deletion. public.UserInfo remains unchanged. Build and Prisma validation passed.",
-    "reviewed_at": "2026-09-08T21:20:38Z",
+    "summary": "AUTH-010-A meets the task and architecture requirements. It generates 256-bit secrets with Node cryptography, uses exact test/live prefixes, hashes the complete raw key with SHA-256, returns only truncated display metadata alongside the one-time raw result, remains stateless, and introduces no persistence, logging, networking, or out-of-scope changes. The deterministic build and Prisma validation passed.",
+    "reviewed_at": "2026-09-10T14:24:10Z",
     "provider": "codex"
   },
   "notes": [
@@ -34,7 +35,7 @@
     "Auth->Core internal request auth is Noop in V1; future signed JWT is a pluggable strategy."
   ],
   "reviewer_rotation": {
-    "slot": 13,
+    "slot": 14,
     "last_provider": "codex",
     "claude_review_every": 0
   }
