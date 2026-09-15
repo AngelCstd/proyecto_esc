@@ -18,6 +18,16 @@ El entregable de cierre es **`docs/human-review-checklist.md`** — un checklist
 loop enumerando exactamente qué debe verificar un humano antes de confiar en esto. Empieza por
 ahí. El otro documento relevante es `docs/integration-contracts.md` (contratos de integración).
 
+### Relación con el ecosistema Noktos
+Los tres repositorios del proyecto (`noktos-auth`, `noktos-agent-frontend` y `noktos-agent-backend`)
+han completado sus respectivos loops autónomos y están en `READY_FOR_HUMAN_REVIEW`.
+- `noktos-agent-backend` utiliza actualmente un mock (`NoktosClient`) para comunicarse con Noktos,
+  debido a que `noktos-auth` contiene las capas internas de dominio y seguridad pero aún no expone
+  los controladores públicos HTTP.
+- Para unir `noktos-agent-backend` con `noktos-auth` en una fase posterior, el siguiente paso de
+  producto es implementar los controladores públicos en este repositorio sobre la infraestructura
+  existente (`CoreClient` / `AppClient`).
+
 Después, lee **`PENDIENTES.md`** (cosas conscientemente diferidas) y **`.loop/ARCHITECTURE_DECISIONS.md`**
 sección `OPEN` (decisiones que siguen sin tomarse).
 
